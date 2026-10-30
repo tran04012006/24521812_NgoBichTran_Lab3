@@ -6,11 +6,11 @@ import {
   getSecureImageUrl,
 } from "../utils/avatarUtils.js";
 
-function AvatarContent({
-  name,
-  secureSrc,
-  size,
-}) {
+import styles from "./ProfileAvatar.module.css";
+
+const AVATAR_SIZE = 96;
+
+function AvatarContent({ name, secureSrc }) {
   const [hasError, setHasError] = useState(false);
 
   const initials = getInitials(name);
@@ -18,7 +18,7 @@ function AvatarContent({
   if (!secureSrc || hasError) {
     return (
       <span
-        className="avatar-fallback"
+        className={styles.fallback}
         role="img"
         aria-label={`Avatar for ${name}`}
       >
@@ -29,11 +29,11 @@ function AvatarContent({
 
   return (
     <img
-      className="avatar-image"
+      className={styles.image}
       src={secureSrc}
       alt={`Profile photo of ${name}`}
-      width={size}
-      height={size}
+      width={AVATAR_SIZE}
+      height={AVATAR_SIZE}
       loading="eager"
       decoding="async"
       referrerPolicy="no-referrer"
@@ -42,41 +42,15 @@ function AvatarContent({
   );
 }
 
-function ProfileAvatar({
-  name,
-  src,
-  size = 96,
-}) {
+function ProfileAvatar({ name, src }) {
   const secureSrc = getSecureImageUrl(src);
 
-  const safeSize =
-    Number.isInteger(size) && size > 0
-      ? size
-      : 96;
-
   return (
-    <span
-      className="profile-avatar"
-      style={{
-        display: "inline-flex",
-        width: safeSize,
-        height: safeSize,
-        flexShrink: 0,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "50%",
-        overflow: "hidden",
-        backgroundColor: "#dbeafe",
-        color: "#1e40af",
-        fontWeight: 700,
-        fontSize: safeSize * 0.3,
-      }}
-    >
+    <span className={styles.avatar}>
       <AvatarContent
         key={secureSrc ?? "fallback"}
         name={name}
         secureSrc={secureSrc}
-        size={safeSize}
       />
     </span>
   );

@@ -1,8 +1,12 @@
 
+import styles from "./SkillBadge.module.css";
+
 function SkillBadge({ name }) {
   return (
-    <li className="skill-badge">
-      <span>{name}</span>
+    <li className={styles.badge}>
+      <span className={styles.label}>
+        {name}
+      </span>
     </li>
   );
 }
