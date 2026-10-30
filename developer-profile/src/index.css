@@ -56,9 +56,50 @@ main {
     var(--card-max-width)
   );
 
+  min-width: 0;
   margin: var(--space-10) auto;
 }
 
+main > h1 {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-primary);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  main {
+    margin-block: var(--space-8);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  main {
+    width: calc(100% - 2 * var(--space-3));
+    margin-block: var(--space-4);
+  }
+
+  main > h1 {
+    margin-bottom: var(--space-4);
+    font-size: 1.5rem;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 359px) {
+  main {
+    width: calc(100% - 2 * var(--space-2));
+  }
+
+  main > h1 {
+    font-size: 1.375rem;
+  }
+}
+
+/* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

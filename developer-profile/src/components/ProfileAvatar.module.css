@@ -1,38 +1,93 @@
 
+/* ==============================
+   AVATAR CONTAINER
+================================ */
+
 .avatar {
   --avatar-size: 96px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   flex: 0 0 auto;
 
   width: var(--avatar-size);
   height: var(--avatar-size);
 
   overflow: hidden;
-  border-radius: var(--radius-full);
+
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
+
   border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
 }
+
+/* ==============================
+   AVATAR IMAGE
+================================ */
 
 .image {
   display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
   border-radius: inherit;
 }
+
+/* ==============================
+   FALLBACK INITIALS
+================================ */
 
 .fallback {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   width: 100%;
   height: 100%;
+
   font-size: var(--font-size-2xl);
   font-weight: 700;
   line-height: 1;
+
+  text-align: center;
   user-select: none;
+}
+
+/* ==============================
+   TABLET
+================================ */
+
+@media (max-width: 768px) {
+  .avatar {
+    --avatar-size: 88px;
+  }
+}
+
+/* ==============================
+   MOBILE
+================================ */
+
+@media (max-width: 480px) {
+  .avatar {
+    --avatar-size: 80px;
+  }
+
+  .fallback {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ==============================
+   SMALL MOBILE
+================================ */
+
+@media (max-width: 359px) {
+  .avatar {
+    --avatar-size: 72px;
+  }
 }

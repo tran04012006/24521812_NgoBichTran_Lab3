@@ -1,14 +1,16 @@
 
+/* ==============================
+   BASE CARD
+================================ */
+
 .card {
   width: 100%;
   min-width: 0;
   padding: var(--space-8);
 
   background: var(--color-surface);
-
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-
   box-shadow: var(--shadow-card);
 
   transition:
@@ -19,12 +21,16 @@
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Header */
+/* ==============================
+   HEADER
+================================ */
 
 .header {
   display: flex;
   align-items: center;
   gap: var(--space-6);
+
+  min-width: 0;
 
   padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--color-border);
@@ -39,7 +45,6 @@
   margin: 0;
 
   color: var(--color-text-primary);
-
   font-size: var(--font-size-2xl);
   font-weight: 750;
   line-height: 1.2;
@@ -58,7 +63,9 @@
   overflow-wrap: anywhere;
 }
 
-/* Sections */
+/* ==============================
+   CONTENT SECTIONS
+================================ */
 
 .section {
   min-width: 0;
@@ -72,6 +79,8 @@
   font-size: var(--font-size-lg);
   font-weight: 700;
   line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .description {
@@ -79,104 +88,220 @@
 
   color: var(--color-text-secondary);
   line-height: 1.7;
+
+  overflow-wrap: anywhere;
 }
 
-/* Developer information */
+/* ==============================
+   DESCRIPTION LISTS
+================================ */
 
-.infoList {
+.infoList,
+.gamingList {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
 
-  margin: 0;
-}
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 2fr);
 
-.infoItem {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
 
   min-width: 0;
+  margin: 0;
   padding: var(--space-4);
 
-  background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
-.infoLabel {
+.infoList {
+  background: var(--color-surface-subtle);
+}
+
+.gamingList {
+  background: var(--color-gaming-soft);
+}
+
+.infoLabel,
+.gamingLabel {
+  min-width: 0;
   margin: 0;
 
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   font-weight: 500;
+
+  overflow-wrap: anywhere;
 }
 
-.infoValue {
+.infoValue,
+.gamingValue {
   min-width: 0;
   margin: 0;
 
-  color: var(--color-text-primary);
   font-size: var(--font-size-md);
   font-weight: 600;
 
   overflow-wrap: anywhere;
 }
 
+.infoValue {
+  color: var(--color-text-primary);
+}
+
+.gamingValue {
+  color: var(--color-gaming);
+  font-weight: 700;
+}
+
 .infoLink {
   color: var(--color-primary);
   text-decoration-thickness: 1px;
+
+  overflow-wrap: anywhere;
 }
 
-/* Skill list */
+/* ==============================
+   SKILL LIST
+================================ */
 
 .skillList {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 
+  min-width: 0;
   margin: 0;
   padding: 0;
 
   list-style: none;
 }
 
-/* Gaming profile */
+/* ==============================
+   TABLET: <= 768px
+================================ */
 
-.gamingList {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+@media (max-width: 768px) {
+  .card {
+    padding: var(--space-6);
+  }
 
-  margin: 0;
+  .header {
+    gap: var(--space-4);
+  }
+
+  .name {
+    font-size: var(--font-size-xl);
+  }
+
+  .section {
+    padding-top: var(--space-5);
+  }
+
+  .infoList,
+  .gamingList {
+    column-gap: var(--space-3);
+  }
 }
 
-.gamingItem {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* ==============================
+   MOBILE: <= 480px
+================================ */
 
-  min-width: 0;
-  padding: var(--space-4);
+@media (max-width: 480px) {
+  .card {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
 
-  background: var(--color-gaming-soft);
+  .header {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
 
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+    padding-bottom: var(--space-4);
+    text-align: center;
+  }
+
+  .identity {
+    width: 100%;
+  }
+
+  .name {
+    font-size: var(--font-size-xl);
+  }
+
+  .title {
+    font-size: var(--font-size-sm);
+  }
+
+  .section {
+    padding-top: var(--space-5);
+  }
+
+  .sectionTitle {
+    margin-bottom: var(--space-3);
+    font-size: var(--font-size-md);
+  }
+
+  .description {
+    font-size: var(--font-size-sm);
+  }
+
+  .infoList,
+  .gamingList {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1.5fr);
+
+    column-gap: var(--space-2);
+    row-gap: var(--space-3);
+
+    padding: var(--space-3);
+  }
+
+  .infoLabel,
+  .gamingLabel {
+    font-size: var(--font-size-xs);
+  }
+
+  .infoValue,
+  .gamingValue {
+    font-size: var(--font-size-sm);
+  }
+
+  .skillList {
+    gap: var(--space-2);
+  }
 }
 
-.gamingLabel {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
+/* ==============================
+   SMALL MOBILE: <= 359px
+================================ */
 
-.gamingValue {
-  margin: 0;
+@media (max-width: 359px) {
+  .card {
+    padding: var(--space-3);
+  }
 
-  color: var(--color-gaming);
-  font-size: var(--font-size-md);
-  font-weight: 700;
+  .header {
+    gap: var(--space-2);
+  }
 
-  overflow-wrap: anywhere;
+  .infoList,
+  .gamingList {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-1);
+  }
+
+  .infoValue,
+  .gamingValue {
+    margin-bottom: var(--space-3);
+  }
+
+  .infoValue:last-child,
+  .gamingValue:last-child {
+    margin-bottom: 0;
+  }
 }
