@@ -1,4 +1,6 @@
 
+import SkillBadge from "./SkillBadge.jsx";
+
 const developer = {
   name: "Alex Morgan",
   title: "Frontend Engineer & Pro-Gamer",
@@ -7,7 +9,15 @@ const developer = {
   location: "Ho Chi Minh City, Vietnam",
   experience: "3 years",
   email: "alex@example.com",
-  skills: ["React 19", "JavaScript", "HTML5", "CSS3"],
+
+  skills: [
+    "React 19",
+    "JavaScript",
+    "HTML5",
+    "CSS3",
+    "Node.js",
+  ],
+
   gaming: {
     game: "Valorant",
     rank: "Immortal",
@@ -17,16 +27,23 @@ const developer = {
 
 function DeveloperCard() {
   return (
-    <article aria-labelledby="developer-name">
-      <header>
+    <article
+      className="developer-card"
+      aria-labelledby="developer-name"
+    >
+      <header className="developer-header">
         <hgroup>
-          <h2 id="developer-name">{developer.name}</h2>
+          <h2 id="developer-name">
+            {developer.name}
+          </h2>
+
           <p>{developer.title}</p>
         </hgroup>
       </header>
 
       <section aria-labelledby="about-heading">
         <h3 id="about-heading">About Me</h3>
+
         <p>{developer.description}</p>
       </section>
 
@@ -52,17 +69,24 @@ function DeveloperCard() {
       </section>
 
       <section aria-labelledby="skills-heading">
-        <h3 id="skills-heading">Technical Skills</h3>
+        <h3 id="skills-heading">
+          Technical Skills
+        </h3>
 
-        <ul>
+        <ul className="skill-list">
           {developer.skills.map((skill) => (
-            <li key={skill}>{skill}</li>
+            <SkillBadge
+              key={skill}
+              name={skill}
+            />
           ))}
         </ul>
       </section>
 
       <section aria-labelledby="gaming-heading">
-        <h3 id="gaming-heading">Gaming Profile</h3>
+        <h3 id="gaming-heading">
+          Gaming Profile
+        </h3>
 
         <dl>
           <dt>Favorite Game</dt>
