@@ -1,5 +1,6 @@
 
 import SkillBadge from "./SkillBadge.jsx";
+import ProfileAvatar from "./ProfileAvatar.jsx";
 
 const developer = {
   name: "Alex Morgan",
@@ -9,6 +10,9 @@ const developer = {
   location: "Ho Chi Minh City, Vietnam",
   experience: "3 years",
   email: "alex@example.com",
+
+  avatar:
+    "https://i.pravatar.cc/160?img=47",
 
   skills: [
     "React 19",
@@ -32,6 +36,12 @@ function DeveloperCard() {
       aria-labelledby="developer-name"
     >
       <header className="developer-header">
+        <ProfileAvatar
+          name={developer.name}
+          src={developer.avatar}
+          size={96}
+        />
+
         <hgroup>
           <h2 id="developer-name">
             {developer.name}
@@ -42,7 +52,9 @@ function DeveloperCard() {
       </header>
 
       <section aria-labelledby="about-heading">
-        <h3 id="about-heading">About Me</h3>
+        <h3 id="about-heading">
+          About Me
+        </h3>
 
         <p>{developer.description}</p>
       </section>
