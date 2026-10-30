@@ -1,6 +1,7 @@
 
 import SkillBadge from "./SkillBadge.jsx";
 import ProfileAvatar from "./ProfileAvatar.jsx";
+import styles from "./DeveloperCard.module.css";
 
 const developer = {
   name: "Alex Morgan",
@@ -10,10 +11,7 @@ const developer = {
   location: "Ho Chi Minh City, Vietnam",
   experience: "3 years",
   email: "alex@example.com",
-
-  avatar:
-    "https://i.pravatar.cc/160?img=47",
-
+  avatar: "https://i.pravatar.cc/160?img=47",
   skills: [
     "React 19",
     "JavaScript",
@@ -21,7 +19,6 @@ const developer = {
     "CSS3",
     "Node.js",
   ],
-
   gaming: {
     game: "Valorant",
     rank: "Immortal",
@@ -32,60 +29,98 @@ const developer = {
 function DeveloperCard() {
   return (
     <article
-      className="developer-card"
+      className={styles.card}
       aria-labelledby="developer-name"
     >
-      <header className="developer-header">
+      <header className={styles.header}>
         <ProfileAvatar
           name={developer.name}
           src={developer.avatar}
           size={96}
         />
 
-        <hgroup>
-          <h2 id="developer-name">
+        <hgroup className={styles.identity}>
+          <h2
+            id="developer-name"
+            className={styles.name}
+          >
             {developer.name}
           </h2>
 
-          <p>{developer.title}</p>
+          <p className={styles.title}>
+            {developer.title}
+          </p>
         </hgroup>
       </header>
 
-      <section aria-labelledby="about-heading">
-        <h3 id="about-heading">
+      <section
+        className={styles.section}
+        aria-labelledby="about-heading"
+      >
+        <h3
+          id="about-heading"
+          className={styles.sectionTitle}
+        >
           About Me
         </h3>
 
-        <p>{developer.description}</p>
+        <p className={styles.description}>
+          {developer.description}
+        </p>
       </section>
 
-      <section aria-labelledby="developer-info-heading">
-        <h3 id="developer-info-heading">
+      <section
+        className={styles.section}
+        aria-labelledby="developer-info-heading"
+      >
+        <h3
+          id="developer-info-heading"
+          className={styles.sectionTitle}
+        >
           Developer Information
         </h3>
 
-        <dl>
-          <dt>Location</dt>
-          <dd>{developer.location}</dd>
+        <dl className={styles.infoList}>
+          <dt className={styles.infoLabel}>
+            Location
+          </dt>
+          <dd className={styles.infoValue}>
+            {developer.location}
+          </dd>
 
-          <dt>Experience</dt>
-          <dd>{developer.experience}</dd>
+          <dt className={styles.infoLabel}>
+            Experience
+          </dt>
+          <dd className={styles.infoValue}>
+            {developer.experience}
+          </dd>
 
-          <dt>Email</dt>
-          <dd>
-            <a href={`mailto:${developer.email}`}>
+          <dt className={styles.infoLabel}>
+            Email
+          </dt>
+          <dd className={styles.infoValue}>
+            <a
+              className={styles.infoLink}
+              href={`mailto:${developer.email}`}
+            >
               {developer.email}
             </a>
           </dd>
         </dl>
       </section>
 
-      <section aria-labelledby="skills-heading">
-        <h3 id="skills-heading">
+      <section
+        className={styles.section}
+        aria-labelledby="skills-heading"
+      >
+        <h3
+          id="skills-heading"
+          className={styles.sectionTitle}
+        >
           Technical Skills
         </h3>
 
-        <ul className="skill-list">
+        <ul className={styles.skillList}>
           {developer.skills.map((skill) => (
             <SkillBadge
               key={skill}
@@ -95,20 +130,38 @@ function DeveloperCard() {
         </ul>
       </section>
 
-      <section aria-labelledby="gaming-heading">
-        <h3 id="gaming-heading">
+      <section
+        className={styles.section}
+        aria-labelledby="gaming-heading"
+      >
+        <h3
+          id="gaming-heading"
+          className={styles.sectionTitle}
+        >
           Gaming Profile
         </h3>
 
-        <dl>
-          <dt>Favorite Game</dt>
-          <dd>{developer.gaming.game}</dd>
+        <dl className={styles.gamingList}>
+          <dt className={styles.gamingLabel}>
+            Favorite Game
+          </dt>
+          <dd className={styles.gamingValue}>
+            {developer.gaming.game}
+          </dd>
 
-          <dt>Rank</dt>
-          <dd>{developer.gaming.rank}</dd>
+          <dt className={styles.gamingLabel}>
+            Rank
+          </dt>
+          <dd className={styles.gamingValue}>
+            {developer.gaming.rank}
+          </dd>
 
-          <dt>Role</dt>
-          <dd>{developer.gaming.role}</dd>
+          <dt className={styles.gamingLabel}>
+            Role
+          </dt>
+          <dd className={styles.gamingValue}>
+            {developer.gaming.role}
+          </dd>
         </dl>
       </section>
     </article>

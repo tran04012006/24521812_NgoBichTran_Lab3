@@ -5,7 +5,6 @@ function App() {
   return (
     <main>
       <h1>Developer & Pro-Gamer Profile</h1>
-
       <DeveloperCard />
     </main>
   );

@@ -1,27 +1,71 @@
 
 :root {
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.5;
-  color: #1f2937;
-  background-color: #f8fafc;
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
+html {
   min-width: 0;
 }
 
-main {
-  width: min(100% - 2rem, 800px);
-  margin: 2rem auto;
+body {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: var(--color-primary);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+a:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
 img {
+  display: block;
   max-width: 100%;
+}
+
+main {
+  width: min(
+    calc(100% - 2 * var(--space-4)),
+    var(--card-max-width)
+  );
+
+  margin: var(--space-10) auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
