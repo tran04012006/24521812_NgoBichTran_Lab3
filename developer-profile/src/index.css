@@ -32,17 +32,30 @@ select {
 
 a {
   color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
 }
 
 a:hover {
   color: var(--color-primary-hover);
 }
 
-a:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
+/* Accessible keyboard focus */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-primary-hover);
+  outline-offset: 4px;
   border-radius: var(--radius-sm);
+}
+
+/* Preserve native focus visibility */
+a:focus:not(:focus-visible) {
+  outline: revert;
 }
 
 img {
@@ -55,7 +68,6 @@ main {
     calc(100% - 2 * var(--space-4)),
     var(--card-max-width)
   );
-
   min-width: 0;
   margin: var(--space-10) auto;
 }
@@ -88,7 +100,7 @@ main > h1 {
   }
 }
 
-/* Small mobile */
+/* Small Mobile */
 @media (max-width: 359px) {
   main {
     width: calc(100% - 2 * var(--space-2));
@@ -99,7 +111,7 @@ main > h1 {
   }
 }
 
-/* Respect reduced motion preferences */
+/* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
