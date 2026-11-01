@@ -3,44 +3,75 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // Independent states
+  // ============================================
+  // 1. Independent states
+  // ============================================
+
   const [query, setQuery] = useState("");
   const [minIq, setMinIq] = useState(160);
   const [sortBy, setSortBy] = useState("iq-desc");
 
-  // Accessible input IDs
+  // ============================================
+  // 2. Accessible IDs
+  // ============================================
+
   const searchId = useId();
   const minIqId = useId();
   const sortId = useId();
 
-  // Derived values
+  // ============================================
+  // 3. Normalize filter values
+  // ============================================
+
   const normalizedQuery = query.trim().toLowerCase();
+
+  // An empty IQ input means no restriction
   const effectiveMinIq = minIq ?? 0;
 
-  // Existing filters from Task 3
-  const visiblePeople = SMART_PEOPLE.filter((person) => {
-    const matchesName = person.name
-      .toLowerCase()
-      .includes(normalizedQuery);
+  // ============================================
+  // 4. Derived-state pipeline
+  // ============================================
 
-    const matchesIq = person.iq >= effectiveMinIq;
+  const visiblePeople = SMART_PEOPLE
+    // Filter by name and minimum IQ
+    .filter((person) => {
+      const matchesName = person.name
+        .toLowerCase()
+        .includes(normalizedQuery);
 
-    return matchesName && matchesIq;
-  });
+      const matchesIq = person.iq >= effectiveMinIq;
 
-  // Event handlers
+      return matchesName && matchesIq;
+    })
+
+    // Sort filtered results without mutation
+    .toSorted((a, b) =>
+      sortBy === "iq-desc"
+        ? b.iq - a.iq
+        : a.iq - b.iq
+    );
+
+  // ============================================
+  // 5. Event handlers
+  // ============================================
+
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
   };
 
   const handleMinIqChange = (event) => {
     const value = event.target.valueAsNumber;
+
     setMinIq(Number.isNaN(value) ? null : value);
   };
 
   const handleSortChange = (event) => {
     setSortBy(event.target.value);
   };
+
+  // ============================================
+  // 6. Render
+  // ============================================
 
   return (
     <section
@@ -49,15 +80,19 @@ function ScientistDirectory() {
     >
       <div className="directory-header">
         <h2>Scientist Directory</h2>
-        <p>Explore famous scientists and pioneers.</p>
+
+        <p>
+          Explore famous scientists and pioneers.
+        </p>
       </div>
 
+      {/* Interactive controls */}
       <form
         className="directory-controls"
         role="search"
         onSubmit={(event) => event.preventDefault()}
       >
-        {/* Search by name */}
+        {/* Name search */}
         <div className="form-group">
           <label htmlFor={searchId}>
             Search by scientist name
@@ -72,7 +107,7 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* Minimum IQ */}
+        {/* Minimum IQ filter */}
         <div className="form-group">
           <label htmlFor={minIqId}>
             Minimum IQ
@@ -88,7 +123,7 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* Sorting dropdown */}
+        {/* IQ sorting */}
         <div className="form-group">
           <label htmlFor={sortId}>
             Sort by IQ
@@ -110,7 +145,7 @@ function ScientistDirectory() {
         </div>
       </form>
 
-      {/* Live result count */}
+      {/* Accessible live result count */}
       <p
         className="result-count"
         role="status"
@@ -122,7 +157,7 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
-      {/* Scientist results */}
+      {/* Scientist list */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -136,6 +171,7 @@ function ScientistDirectory() {
                 <p>
                   <strong>Age:</strong> {person.age}
                 </p>
+
                 <p>
                   <strong>IQ:</strong> {person.iq}
                 </p>
@@ -146,6 +182,7 @@ function ScientistDirectory() {
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
+
           <p>
             Try changing your search or minimum IQ.
           </p>
