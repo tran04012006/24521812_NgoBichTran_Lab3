@@ -126,7 +126,7 @@ button:focus-visible {
   font-weight: 700;
 }
 
-/* Interactive squad selector */
+/* Squad selector */
 
 .selector-section {
   margin-top: 30px;
@@ -176,7 +176,7 @@ button:focus-visible {
   font-size: 13px;
 }
 
-/* Four-state telemetry area */
+/* Telemetry content */
 
 .telemetry-content {
   margin-top: 28px;
@@ -189,6 +189,7 @@ button:focus-visible {
   border: 1px solid #334155;
   border-radius: 16px;
   background: #101827;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -198,8 +199,8 @@ button:focus-visible {
 }
 
 .telemetry-message h3 {
-  font-size: 20px;
   margin: 0;
+  font-size: 20px;
 }
 
 .telemetry-message p {
@@ -214,11 +215,108 @@ button:focus-visible {
   border-style: dashed;
 }
 
-.idle-message h3 {
-  color: #e2e8f0;
+/* Blue-Zone skeleton */
+
+.blue-zone-skeleton {
+  height: 220px;
+  min-height: 220px;
+  width: 100%;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+
+  padding: 20px;
+  border: 1px solid #2563eb;
+  border-radius: 16px;
+  background: #101d34;
 }
 
-/* LOADING */
+.skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #2d4a75;
+}
+
+.skeleton-header-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: #2d4a75;
+}
+
+.skeleton-title {
+  width: 65%;
+}
+
+.skeleton-subtitle {
+  width: 42%;
+}
+
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.skeleton-stat {
+  height: 46px;
+  border-radius: 8px;
+  background: #2d4a75;
+}
+
+.skeleton-footer {
+  height: 12px;
+  width: 78%;
+  border-radius: 6px;
+  background: #2d4a75;
+}
+
+.skeleton-caption {
+  margin: 0;
+  color: #bfdbfe;
+  font-size: 13px;
+  text-align: center;
+}
+
+.skeleton-pulse {
+  animation: blue-zone-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes blue-zone-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Loading fallback */
 
 .loading-message {
   border-color: #2563eb;
@@ -239,7 +337,7 @@ button:focus-visible {
   }
 }
 
-/* ERROR */
+/* Error states */
 
 .error-message {
   border-color: #b91c1c;
@@ -250,7 +348,26 @@ button:focus-visible {
   color: #fca5a5;
 }
 
-/* SUCCESS */
+.retry-button {
+  min-height: 44px;
+  padding: 12px 20px;
+  border: 1px solid #f59e0b;
+  border-radius: 10px;
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.retry-button:hover {
+  background: #fbbf24;
+}
+
+.retry-button:active {
+  background: #d97706;
+}
+
+/* Success state */
 
 .match-card {
   min-height: 220px;
@@ -335,14 +452,16 @@ button:focus-visible {
   border-top: 1px solid #293246;
 }
 
-/* Accessibility */
+/* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse,
   .loading-spinner {
     animation: none;
   }
 
-  .squad-item {
+  .squad-item,
+  .retry-button {
     transition: none;
   }
 }
@@ -389,5 +508,18 @@ button:focus-visible {
 
   .match-card {
     padding: 16px;
+  }
+
+  .blue-zone-skeleton {
+    padding: 14px;
+  }
+
+  .skeleton-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .skeleton-stat {
+    height: 24px;
   }
 }

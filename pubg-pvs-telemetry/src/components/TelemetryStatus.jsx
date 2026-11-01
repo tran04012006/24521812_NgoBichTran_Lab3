@@ -1,4 +1,6 @@
 
+import BlueZoneSkeleton from "./BlueZoneSkeleton.jsx";
+
 import {
   TELEMETRY_STATUS,
 } from "../hooks/useTelemetry.js";
@@ -7,10 +9,9 @@ function TelemetryStatus({ view }) {
   switch (view.status) {
     case TELEMETRY_STATUS.IDLE:
       return (
-        <section
-          className="telemetry-message idle-message"
-        >
+        <section className="telemetry-message idle-message">
           <h3>Telemetry Ready</h3>
+
           <p>
             Select a PUBG squad to begin tracking
             match statistics.
@@ -19,22 +20,7 @@ function TelemetryStatus({ view }) {
       );
 
     case TELEMETRY_STATUS.LOADING:
-      return (
-        <section
-          className="telemetry-message loading-message"
-          aria-busy="true"
-          aria-label="Loading telemetry"
-        >
-          <div
-            className="loading-spinner"
-            aria-hidden="true"
-          />
-
-          <p role="status">
-            Loading PUBG match telemetry...
-          </p>
-        </section>
-      );
+      return <BlueZoneSkeleton />;
 
     case TELEMETRY_STATUS.ERROR:
       return (
@@ -43,11 +29,9 @@ function TelemetryStatus({ view }) {
           role="alert"
         >
           <h3>Telemetry Unavailable</h3>
+
           <p>
             {view.error || "Something went wrong."}
-          </p>
-          <p>
-            Unable to retrieve the selected squad.
           </p>
         </section>
       );
@@ -127,6 +111,7 @@ function TelemetryStatus({ view }) {
             <span className="status-label">
               Current Status
             </span>
+
             <span className="status-value">
               {squad.status}
             </span>

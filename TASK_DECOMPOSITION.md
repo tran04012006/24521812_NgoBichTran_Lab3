@@ -67,3 +67,28 @@ Vietnam Series Live Telemetry Dashboard.
 - Preserve the selected squad when loading.
 
 
+## Task 4 — Skeleton and Retry [Current]
+
+### Objective
+Provide stable loading feedback and accessible
+recovery when telemetry requests fail.
+
+### Task 4.1 — Blue-Zone Skeleton
+
+- Render a loading skeleton during LOADING.
+- Set skeleton height to exactly 220px.
+- Add a blue pulsating CSS animation.
+- Avoid loading-state layout collapse.
+- Respect prefers-reduced-motion.
+- Mark decorative shapes aria-hidden.
+
+### Task 4.2 — Error Recovery
+
+- Render an accessible error message.
+- Use role="alert" for request failures.
+- Add Reconnect Satellite button.
+- Implement retryTick state.
+- Re-run useEffect when retryTick changes.
+- Abort the previous request during cleanup.
+- Clear previous errors before retrying.
+- Do not use window.alert().
