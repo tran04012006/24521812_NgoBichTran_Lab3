@@ -3,23 +3,29 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // Independent state: the text entered by the user
+  // Independent state
   const [query, setQuery] = useState("");
+  const [minIq, setMinIq] = useState(160);
 
-  // Generate a unique ID for the search input
+  // Accessible input IDs
   const searchId = useId();
+  const minIqId = useId();
 
-  // Normalize the search query
+  // Derived state: name search only for Commit 5
   const normalizedQuery = query.trim().toLowerCase();
 
-  // Derived state: calculate matching scientists
   const visiblePeople = SMART_PEOPLE.filter((person) =>
     person.name.toLowerCase().includes(normalizedQuery)
   );
 
-  // Handle changes in the search input
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
+  };
+
+  const handleMinIqChange = (event) => {
+    const value = event.target.valueAsNumber;
+
+    setMinIq(Number.isNaN(value) ? null : value);
   };
 
   return (
@@ -35,7 +41,6 @@ function ScientistDirectory() {
         </p>
       </div>
 
-      {/* Search input */}
       <form
         className="directory-controls"
         role="search"
@@ -54,9 +59,23 @@ function ScientistDirectory() {
             onChange={handleSearchChange}
           />
         </div>
+
+        <div className="form-group">
+          <label htmlFor={minIqId}>
+            Minimum IQ
+          </label>
+
+          <input
+            id={minIqId}
+            type="number"
+            min="0"
+            step="1"
+            value={minIq ?? ""}
+            onChange={handleMinIqChange}
+          />
+        </div>
       </form>
 
-      {/* Live result count */}
       <p
         className="result-count"
         role="status"
@@ -68,7 +87,6 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
-      {/* Results */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -93,7 +111,7 @@ function ScientistDirectory() {
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
-          <p>Try searching for another name.</p>
+          <p>Try changing your search criteria.</p>
         </div>
       )}
     </section>
