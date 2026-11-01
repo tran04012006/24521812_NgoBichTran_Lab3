@@ -69,3 +69,51 @@ TASK 2: INTERACTIVE SEARCH FUNCTIONALITY
 └── 2.7 Git Version Control
     ├── Commit 3: Controlled search input
     └── Commit 4: Derived filtering and result count
+TASK 3: MINIMUM IQ NUMERIC FILTERING
+│
+├── 3.1 Review Existing Architecture
+│   ├── Preserve the SMART_PEOPLE dataset
+│   ├── Preserve query state
+│   ├── Preserve case-insensitive search
+│   └── Preserve accessible search controls
+│
+├── 3.2 Implement Minimum IQ Input
+│   ├── Create minIq independent state
+│   ├── Initialize minIq to 160
+│   ├── Create an input with type="number"
+│   ├── Connect input with useId()
+│   ├── Handle onChange using valueAsNumber
+│   └── Handle empty input values safely
+│
+├── 3.3 Implement Type-Safe Numeric Filtering
+│   ├── Read the current minIq value
+│   ├── Determine the effective IQ threshold
+│   ├── Compare scientist IQ with >=
+│   └── Preserve numeric comparisons
+│
+├── 3.4 Combine Search and IQ Conditions
+│   ├── Normalize search query
+│   ├── Check name matching
+│   ├── Check minimum IQ
+│   ├── Combine conditions using &&
+│   └── Calculate visiblePeople during render
+│
+├── 3.5 Update the User Interface
+│   ├── Display search and numeric controls
+│   ├── Render filtered scientist cards
+│   ├── Preserve live result count
+│   ├── Display an empty-state message
+│   └── Update responsive CSS
+│
+├── 3.6 Verify Functionality
+│   ├── Test minimum IQ = 160
+│   ├── Test minimum IQ = 200
+│   ├── Test minimum IQ = 210
+│   ├── Test minimum IQ = 220
+│   ├── Test blank numeric input
+│   ├── Test combined name and IQ filters
+│   └── Test restoring the default threshold
+│
+└── 3.7 Git Version Control
+    ├── Commit 5: Numeric IQ input and state
+    └── Commit 6: Combined derived filtering
