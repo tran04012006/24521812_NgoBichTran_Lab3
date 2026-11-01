@@ -3,31 +3,21 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // ======================================
-  // 1. Independent React states
-  // ======================================
-
+  // Independent states
   const [query, setQuery] = useState("");
   const [minIq, setMinIq] = useState(160);
+  const [sortBy, setSortBy] = useState("iq-desc");
 
-  // ======================================
-  // 2. Accessible input IDs
-  // ======================================
-
+  // Accessible input IDs
   const searchId = useId();
   const minIqId = useId();
+  const sortId = useId();
 
-  // ======================================
-  // 3. Derived values
-  // ======================================
-
-  // Normalize the search query
+  // Derived values
   const normalizedQuery = query.trim().toLowerCase();
-
-  // Treat an empty IQ input as no restriction
   const effectiveMinIq = minIq ?? 0;
 
-  // Apply name and IQ filters together
+  // Existing filters from Task 3
   const visiblePeople = SMART_PEOPLE.filter((person) => {
     const matchesName = person.name
       .toLowerCase()
@@ -38,24 +28,19 @@ function ScientistDirectory() {
     return matchesName && matchesIq;
   });
 
-  // ======================================
-  // 4. Event handlers
-  // ======================================
-
+  // Event handlers
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
   };
 
   const handleMinIqChange = (event) => {
     const value = event.target.valueAsNumber;
-
-    // Avoid storing NaN in React state
     setMinIq(Number.isNaN(value) ? null : value);
   };
 
-  // ======================================
-  // 5. Render UI
-  // ======================================
+  const handleSortChange = (event) => {
+    setSortBy(event.target.value);
+  };
 
   return (
     <section
@@ -64,18 +49,15 @@ function ScientistDirectory() {
     >
       <div className="directory-header">
         <h2>Scientist Directory</h2>
-
-        <p>
-          Explore famous scientists and pioneers.
-        </p>
+        <p>Explore famous scientists and pioneers.</p>
       </div>
 
-      {/* Search and IQ controls */}
       <form
         className="directory-controls"
         role="search"
         onSubmit={(event) => event.preventDefault()}
       >
+        {/* Search by name */}
         <div className="form-group">
           <label htmlFor={searchId}>
             Search by scientist name
@@ -90,6 +72,7 @@ function ScientistDirectory() {
           />
         </div>
 
+        {/* Minimum IQ */}
         <div className="form-group">
           <label htmlFor={minIqId}>
             Minimum IQ
@@ -104,9 +87,30 @@ function ScientistDirectory() {
             onChange={handleMinIqChange}
           />
         </div>
+
+        {/* Sorting dropdown */}
+        <div className="form-group">
+          <label htmlFor={sortId}>
+            Sort by IQ
+          </label>
+
+          <select
+            id={sortId}
+            value={sortBy}
+            onChange={handleSortChange}
+          >
+            <option value="iq-desc">
+              Highest IQ first
+            </option>
+
+            <option value="iq-asc">
+              Lowest IQ first
+            </option>
+          </select>
+        </div>
       </form>
 
-      {/* Accessible live result count */}
+      {/* Live result count */}
       <p
         className="result-count"
         role="status"
@@ -118,7 +122,7 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
-      {/* Scientist cards or empty state */}
+      {/* Scientist results */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -132,7 +136,6 @@ function ScientistDirectory() {
                 <p>
                   <strong>Age:</strong> {person.age}
                 </p>
-
                 <p>
                   <strong>IQ:</strong> {person.iq}
                 </p>
@@ -143,7 +146,6 @@ function ScientistDirectory() {
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
-
           <p>
             Try changing your search or minimum IQ.
           </p>

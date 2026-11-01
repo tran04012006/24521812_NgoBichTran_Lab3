@@ -117,3 +117,56 @@ TASK 3: MINIMUM IQ NUMERIC FILTERING
 └── 3.7 Git Version Control
     ├── Commit 5: Numeric IQ input and state
     └── Commit 6: Combined derived filtering
+TASK 4: IQ SORTING & DERIVED STATE PIPELINE
+│
+├── 4.1 Review Existing Architecture
+│   ├── Preserve normalized SMART_PEOPLE data
+│   ├── Preserve query state
+│   ├── Preserve minIq state
+│   ├── Preserve accessible labels
+│   └── Preserve live result count
+│
+├── 4.2 Add Sorting Controls
+│   ├── Create sortBy state
+│   ├── Set default value to "iq-desc"
+│   ├── Generate an ID with useId()
+│   ├── Create a controlled select input
+│   ├── Add ascending IQ option
+│   ├── Add descending IQ option
+│   └── Connect onChange to setSortBy
+│
+├── 4.3 Implement Immutable Sorting
+│   ├── Understand Array.sort() mutation
+│   ├── Use ES2023 Array.toSorted()
+│   ├── Implement ascending comparator
+│   ├── Implement descending comparator
+│   └── Avoid modifying SMART_PEOPLE
+│
+├── 4.4 Build Derived State Pipeline
+│   ├── Normalize name query
+│   ├── Calculate effective minimum IQ
+│   ├── Filter by scientist name
+│   ├── Filter by minimum IQ
+│   ├── Sort filtered scientists
+│   └── Return visiblePeople
+│
+├── 4.5 Update Interface
+│   ├── Display search input
+│   ├── Display minimum IQ input
+│   ├── Display sorting dropdown
+│   ├── Render sorted scientist cards
+│   ├── Preserve empty-state message
+│   └── Update responsive layout
+│
+├── 4.6 Verify Functionality
+│   ├── Test descending IQ sorting
+│   ├── Test ascending IQ sorting
+│   ├── Test combined search and sorting
+│   ├── Test combined IQ filter and sorting
+│   ├── Test all three controls together
+│   ├── Verify original data is unchanged
+│   └── Run production build
+│
+└── 4.7 Git Version Control
+    ├── Commit 7: Add controlled sort selector
+    └── Commit 8: Implement immutable derived sorting
