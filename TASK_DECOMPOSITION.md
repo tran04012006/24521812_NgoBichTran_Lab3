@@ -44,3 +44,26 @@ Vietnam Series Live Telemetry Dashboard.
 - Display loading and success states.
 - Provide an accessible error state.
 - Maintain responsive styling.
+
+## Task 3 — AbortController
+
+### Task 3.1 — Service Layer
+- Accept an AbortSignal.
+- Cancel simulated network timers on abort.
+- Reject aborted requests with AbortError.
+- Simulate 35% request failure for
+  Erangel and Miramar.
+- Return a fresh copy of squad data.
+- Log request start, success, failure,
+  and cancellation for debugging.
+  ### Task 3.2 — Hook Integration
+
+- Create AbortController inside useEffect.
+- Pass signal to the telemetry service.
+- Abort previous requests during cleanup.
+- Ignore AbortError.
+- Maintain four-state lifecycle.
+- Prevent obsolete requests from updating UI.
+- Preserve the selected squad when loading.
+
+
