@@ -12,6 +12,10 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -33,7 +37,22 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
-/* Application layout */
+/* Accessibility utilities */
+
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+/* Application */
 
 .app-container {
   min-height: 100vh;
@@ -47,33 +66,40 @@ button:focus-visible {
   align-items: center;
   gap: 24px;
   padding: 32px 7%;
-  border-bottom: 1px solid #293246;
   background: #101727;
+  border-bottom: 1px solid #293246;
+}
+
+.app-header-content {
+  min-width: 0;
 }
 
 .app-overline {
-  color: #f59e0b;
+  margin: 0 0 10px;
+  color: #fbbf24;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  margin: 0 0 10px;
 }
 
 .app-header h1 {
   margin: 0;
   font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.2;
 }
 
 .app-subtitle {
-  color: #94a3b8;
   margin: 10px 0 0;
+  color: #cbd5e1;
+  line-height: 1.5;
 }
 
 .header-indicator {
+  flex-shrink: 0;
   padding: 10px 16px;
   border: 1px solid #f59e0b;
   border-radius: 8px;
-  color: #f59e0b;
+  color: #fbbf24;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -85,39 +111,42 @@ button:focus-visible {
   margin: 0 auto;
   padding: 40px 24px;
   flex: 1;
+  min-width: 0;
 }
 
-/* Telemetry panel */
+/* Main telemetry panel */
 
 .telemetry-panel {
   padding: 28px;
   border: 1px solid #334155;
   border-radius: 20px;
   background: #151d2e;
+  min-width: 0;
 }
 
 .panel-header,
 .match-card-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
 }
 
 .panel-header h2 {
   margin: 6px 0;
-  font-size: 25px;
+  font-size: clamp(20px, 3vw, 25px);
 }
 
 .eyebrow {
   margin: 0;
-  color: #f59e0b;
+  color: #fbbf24;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .live-badge {
+  flex-shrink: 0;
   padding: 8px 12px;
   border: 1px solid #10b981;
   border-radius: 8px;
@@ -133,69 +162,103 @@ button:focus-visible {
 }
 
 .selector-section h3 {
-  margin-bottom: 16px;
+  margin: 0 0 16px;
   font-size: 16px;
 }
 
 .squad-list {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
 .squad-item {
-  padding: 16px;
-  border: 1px solid #334155;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  min-width: 0;
+  min-height: 56px;
+  padding: 12px;
+
+  border: 1px solid #475569;
   border-radius: 10px;
+
   background: #1e293b;
-  color: #cbd5e1;
+  color: #e2e8f0;
+
   font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
   text-align: center;
+
   overflow-wrap: anywhere;
+
   transition:
-    background 0.2s ease,
+    background-color 0.2s ease,
     border-color 0.2s ease;
 }
 
 .squad-item:hover {
   background: #293750;
-  border-color: #64748b;
+  border-color: #94a3b8;
 }
 
 .squad-item-active,
 .squad-item-active:hover {
-  border-color: #f59e0b;
   background: #3b2c16;
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+.squad-name {
+  min-width: 0;
+}
+
+.selection-marker {
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 700;
   color: #fbbf24;
 }
 
 .helper-text {
-  margin-top: 12px;
-  color: #94a3b8;
+  margin: 12px 0 0;
+  color: #cbd5e1;
   font-size: 13px;
+  line-height: 1.6;
 }
 
-/* Telemetry content */
+.selected-squad-label {
+  margin: 0 0 14px;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* State display */
 
 .telemetry-content {
   margin-top: 28px;
-  min-height: 220px;
+  min-height: 330px;
+  min-width: 0;
 }
 
 .telemetry-message {
-  min-height: 220px;
+  min-height: 330px;
   padding: 32px 20px;
-  border: 1px solid #334155;
+
+  border: 1px solid #475569;
   border-radius: 16px;
   background: #101827;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  gap: 14px;
+
   text-align: center;
-  gap: 12px;
 }
 
 .telemetry-message h3 {
@@ -205,31 +268,33 @@ button:focus-visible {
 
 .telemetry-message p {
   margin: 0;
+  color: #e2e8f0;
   line-height: 1.6;
-  color: #cbd5e1;
+  overflow-wrap: anywhere;
 }
 
-/* IDLE */
+/* Idle */
 
 .idle-message {
   border-style: dashed;
 }
 
-/* Blue-Zone skeleton */
+/* Loading skeleton */
 
 .blue-zone-skeleton {
+  width: 100%;
   height: 220px;
   min-height: 220px;
-  width: 100%;
-  overflow: hidden;
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 16px;
 
+  overflow: hidden;
   padding: 20px;
-  border: 1px solid #2563eb;
+
+  border: 1px solid #3b82f6;
   border-radius: 16px;
   background: #101d34;
 }
@@ -251,12 +316,14 @@ button:focus-visible {
   height: 48px;
   flex-shrink: 0;
   border-radius: 10px;
-  background: #2d4a75;
+  background: #365986;
 }
 
 .skeleton-header-lines {
-  display: flex;
+  min-width: 0;
   flex: 1;
+
+  display: flex;
   flex-direction: column;
   gap: 10px;
 }
@@ -264,7 +331,7 @@ button:focus-visible {
 .skeleton-line {
   height: 12px;
   border-radius: 6px;
-  background: #2d4a75;
+  background: #365986;
 }
 
 .skeleton-title {
@@ -283,21 +350,23 @@ button:focus-visible {
 
 .skeleton-stat {
   height: 46px;
+  min-width: 0;
   border-radius: 8px;
-  background: #2d4a75;
+  background: #365986;
 }
 
 .skeleton-footer {
-  height: 12px;
   width: 78%;
+  height: 12px;
   border-radius: 6px;
-  background: #2d4a75;
+  background: #365986;
 }
 
 .skeleton-caption {
   margin: 0;
   color: #bfdbfe;
   font-size: 13px;
+  line-height: 1.4;
   text-align: center;
 }
 
@@ -316,31 +385,10 @@ button:focus-visible {
   }
 }
 
-/* Loading fallback */
-
-.loading-message {
-  border-color: #2563eb;
-}
-
-.loading-spinner {
-  width: 42px;
-  height: 42px;
-  border: 4px solid #334155;
-  border-top-color: #60a5fa;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Error states */
+/* Error recovery */
 
 .error-message {
-  border-color: #b91c1c;
+  border-color: #ef4444;
   background: #301b23;
 }
 
@@ -348,15 +396,25 @@ button:focus-visible {
   color: #fca5a5;
 }
 
+.error-message p {
+  max-width: 580px;
+}
+
 .retry-button {
   min-height: 44px;
   padding: 12px 20px;
+  margin-top: 8px;
+
   border: 1px solid #f59e0b;
   border-radius: 10px;
+
   background: #f59e0b;
   color: #111827;
+
   font-weight: 700;
-  transition: background 0.2s ease;
+  line-height: 1.4;
+
+  transition: background-color 0.2s ease;
 }
 
 .retry-button:hover {
@@ -367,57 +425,71 @@ button:focus-visible {
   background: #d97706;
 }
 
-/* Success state */
+/* Success card */
 
 .match-card {
-  min-height: 220px;
+  min-height: 330px;
+  min-width: 0;
+
   padding: 24px;
-  border: 1px solid #334155;
+
+  border: 1px solid #475569;
   border-radius: 16px;
   background: #101827;
 }
 
 .match-card-header h3 {
   margin: 8px 0 0;
-  font-size: 23px;
+  font-size: clamp(18px, 3vw, 23px);
+  overflow-wrap: anywhere;
 }
 
 .map-badge {
+  flex-shrink: 0;
   padding: 8px 14px;
+
   border-radius: 8px;
   background: #263954;
-  color: #93c5fd;
+  color: #bfdbfe;
+
   font-size: 13px;
   font-weight: 600;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-top: 24px;
 }
 
 .stat-box {
+  min-width: 0;
+  min-height: 100px;
+
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 12px;
-  padding: 20px;
-  border: 1px solid #29394d;
+
+  padding: 18px;
+
+  border: 1px solid #334155;
   border-radius: 12px;
   background: #1e293b;
 }
 
 .stat-label {
-  color: #94a3b8;
+  color: #cbd5e1;
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .stat-value {
   color: #f8fafc;
-  font-size: 26px;
+  font-size: clamp(20px, 3vw, 26px);
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .status-section {
@@ -425,54 +497,66 @@ button:focus-visible {
   justify-content: space-between;
   align-items: center;
   gap: 14px;
+
   margin-top: 24px;
   padding: 16px;
+
   border-radius: 10px;
   background: #203329;
 }
 
 .status-label {
-  color: #cbd5e1;
+  color: #e2e8f0;
   font-size: 14px;
 }
 
 .status-value {
-  color: #6ee7b7;
+  color: #86efac;
   font-size: 14px;
   font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 /* Footer */
 
 .app-footer {
   padding: 20px;
-  text-align: center;
-  color: #94a3b8;
-  font-size: 13px;
   border-top: 1px solid #293246;
+
+  color: #cbd5e1;
+  font-size: 13px;
+  text-align: center;
 }
 
-/* Reduced motion */
+/* Tablet */
 
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-pulse,
-  .loading-spinner {
-    animation: none;
+@media (max-width: 900px) {
+  .squad-list,
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .squad-item,
-  .retry-button {
-    transition: none;
+  .telemetry-content {
+    min-height: 360px;
+  }
+
+  .match-card {
+    min-height: 360px;
+  }
+
+  .telemetry-message {
+    min-height: 360px;
   }
 }
 
-/* Responsive */
+/* Mobile */
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .app-header {
+    padding: 24px;
     flex-direction: column;
     align-items: flex-start;
-    padding: 24px;
   }
 
   .main-content {
@@ -483,43 +567,76 @@ button:focus-visible {
     padding: 18px;
   }
 
-  .squad-list,
-  .stats-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .panel-header,
-  .match-card-header {
+  .panel-header {
     align-items: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .squad-list,
-  .stats-grid {
-    grid-template-columns: 1fr;
+    flex-wrap: wrap;
   }
 
-  .panel-header,
-  .match-card-header {
-    flex-direction: column;
+  .telemetry-content {
+    min-height: 400px;
+  }
+
+  .telemetry-message {
+    min-height: 400px;
+    padding: 20px 14px;
   }
 
   .match-card {
-    padding: 16px;
+    min-height: 400px;
+    padding: 18px;
+  }
+
+  .status-section {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .status-value {
+    text-align: left;
+  }
+}
+
+/* Narrow mobile */
+
+@media (max-width: 380px) {
+  .squad-list {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-box {
+    padding: 12px;
   }
 
   .blue-zone-skeleton {
     padding: 14px;
   }
 
+  .skeleton-header {
+    gap: 10px;
+  }
+
   .skeleton-stats {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .skeleton-stat {
     height: 24px;
+  }
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
