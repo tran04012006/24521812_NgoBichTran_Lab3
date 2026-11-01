@@ -23,10 +23,11 @@ export function useTelemetry(squadId) {
 
   useEffect(() => {
     if (!squadId) {
+      setView(initialView);
       return;
     }
 
-    let ignore = false;
+    const controller = new AbortController();
 
     setView({
       status: TELEMETRY_STATUS.LOADING,
@@ -34,9 +35,13 @@ export function useTelemetry(squadId) {
       error: null,
     });
 
-    fetchKraftonPubgTelemetry(squadId)
+    fetchKraftonPubgTelemetry(squadId, {
+      signal: controller.signal,
+    })
       .then((data) => {
-        if (ignore) return;
+        if (controller.signal.aborted) {
+          return;
+        }
 
         setView({
           status: TELEMETRY_STATUS.SUCCESS,
@@ -45,7 +50,12 @@ export function useTelemetry(squadId) {
         });
       })
       .catch((error) => {
-        if (ignore) return;
+        if (
+          controller.signal.aborted ||
+          error.name === "AbortError"
+        ) {
+          return;
+        }
 
         setView({
           status: TELEMETRY_STATUS.ERROR,
@@ -55,7 +65,7 @@ export function useTelemetry(squadId) {
       });
 
     return () => {
-      ignore = true;
+      controller.abort();
     };
   }, [squadId]);
 

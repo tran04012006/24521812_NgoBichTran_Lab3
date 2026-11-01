@@ -4,7 +4,14 @@ import { useState } from "react";
 import SquadSelector from "./SquadSelector.jsx";
 import TelemetryStatus from "./TelemetryStatus.jsx";
 
-import { useTelemetry } from "../hooks/useTelemetry.js";
+import {
+  PUBG_VN_SQUADS,
+} from "../data/pubgTelemetry.js";
+
+import {
+  useTelemetry,
+  TELEMETRY_STATUS,
+} from "../hooks/useTelemetry.js";
 
 function PubgMatchTelemetry() {
   const [selectedSquadId, setSelectedSquadId] =
@@ -12,9 +19,16 @@ function PubgMatchTelemetry() {
 
   const view = useTelemetry(selectedSquadId);
 
+  const selectedSquad = PUBG_VN_SQUADS.find(
+    (squad) => squad.id === selectedSquadId
+  );
+
   const handleSelectSquad = (squadId) => {
     setSelectedSquadId(squadId);
   };
+
+  const isLoading =
+    view.status === TELEMETRY_STATUS.LOADING;
 
   return (
     <section
@@ -43,6 +57,18 @@ function PubgMatchTelemetry() {
       />
 
       <div className="telemetry-content">
+        {selectedSquad && (
+          <p className="helper-text">
+            Selected squad: {selectedSquad.name}
+          </p>
+        )}
+
+        {isLoading && (
+          <p className="helper-text">
+            Requesting match telemetry...
+          </p>
+        )}
+
         <TelemetryStatus view={view} />
       </div>
     </section>
