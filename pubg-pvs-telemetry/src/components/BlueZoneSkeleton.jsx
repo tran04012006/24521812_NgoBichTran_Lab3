@@ -1,10 +1,9 @@
 
 function BlueZoneSkeleton() {
   return (
-    <section
+    <div
       className="blue-zone-skeleton"
-      aria-label="Loading PUBG match telemetry"
-      aria-busy="true"
+      aria-label="Loading match telemetry"
     >
       <div
         className="skeleton-content"
@@ -29,10 +28,10 @@ function BlueZoneSkeleton() {
         <div className="skeleton-footer skeleton-pulse" />
       </div>
 
-      <p className="skeleton-caption" role="status">
+      <p className="skeleton-caption">
         Receiving Blue-Zone satellite telemetry...
       </p>
-    </section>
+    </div>
   );
 }
 

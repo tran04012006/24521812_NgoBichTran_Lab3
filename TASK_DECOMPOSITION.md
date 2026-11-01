@@ -92,3 +92,26 @@ recovery when telemetry requests fail.
 - Abort the previous request during cleanup.
 - Clear previous errors before retrying.
 - Do not use window.alert().
+## Task 5 — Accessibility and Responsive UI [Current]
+
+### 5.1 Accessibility
+
+- Use semantic button elements.
+- Announce status updates using aria-live.
+- Set aria-busy during loading.
+- Maintain aria-pressed for selected squads.
+- Use role=alert for request errors.
+- Provide meaningful accessible labels.
+- Keep decorative skeleton elements hidden.
+- Avoid duplicate loading announcements.
+- Preserve logical keyboard focus.
+
+### 5.2 Responsive Design
+
+- Improve focus-visible styling.
+- Improve responsive grid behavior.
+- Preserve a 220px skeleton.
+- Reduce layout movement.
+- Provide readable text contrast.
+- Support reduced-motion preferences.
+- Prevent horizontal overflow at 320px.

@@ -43,6 +43,35 @@ function PubgMatchTelemetry() {
   const isLoading =
     view.status === TELEMETRY_STATUS.LOADING;
 
+  let statusMessage = "";
+
+  switch (view.status) {
+    case TELEMETRY_STATUS.IDLE:
+      statusMessage =
+        "Telemetry ready. Select a squad.";
+      break;
+
+    case TELEMETRY_STATUS.LOADING:
+      statusMessage = selectedSquad
+        ? `Loading telemetry for ${selectedSquad.name}.`
+        : "Loading telemetry.";
+      break;
+
+    case TELEMETRY_STATUS.SUCCESS:
+      statusMessage = view.data
+        ? `${view.data.name} telemetry loaded successfully.`
+        : "Telemetry response received.";
+      break;
+
+    case TELEMETRY_STATUS.ERROR:
+      // The error component owns its role="alert".
+      statusMessage = "";
+      break;
+
+    default:
+      break;
+  }
+
   return (
     <section
       className="telemetry-panel"
@@ -69,16 +98,25 @@ function PubgMatchTelemetry() {
         onSelectSquad={handleSelectSquad}
       />
 
-      <div className="telemetry-content">
-        {selectedSquad && (
-          <p className="helper-text">
-            Selected squad: {selectedSquad.name}
-          </p>
-        )}
+      <div
+        className="screen-reader-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {statusMessage}
+      </div>
 
-        {isLoading && (
-          <p className="helper-text">
-            Requesting match telemetry...
+      <div
+        id="telemetry-results"
+        className="telemetry-content"
+        role="region"
+        aria-label="PUBG squad telemetry results"
+        aria-busy={isLoading}
+      >
+        {selectedSquad && (
+          <p className="helper-text selected-squad-label">
+            Selected squad: {selectedSquad.name}
           </p>
         )}
 

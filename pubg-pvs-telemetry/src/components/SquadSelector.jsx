@@ -35,16 +35,30 @@ function SquadSelector({
                   : "squad-item"
               }
               aria-pressed={isSelected}
+              aria-controls="telemetry-results"
               onClick={() => onSelectSquad(squad.id)}
             >
-              {squad.name}
+              <span className="squad-name">
+                {squad.name}
+              </span>
+
+              {isSelected && (
+                <span
+                  className="selection-marker"
+                  aria-hidden="true"
+                >
+                  ✓
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
       <p className="helper-text">
-        Choose a team to load its match telemetry.
+        Choose a squad to view its match telemetry.
+        Use Tab to move between squads and press
+        Enter or Space to select.
       </p>
     </section>
   );

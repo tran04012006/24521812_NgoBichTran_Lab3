@@ -24,6 +24,7 @@ function TelemetryError({ error, onRetry }) {
         type="button"
         className="retry-button"
         onClick={onRetry}
+        aria-label="Reconnect satellite and retry telemetry request"
       >
         Reconnect Satellite (Retry)
       </button>

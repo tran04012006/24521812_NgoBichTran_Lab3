@@ -1,6 +1,7 @@
 
 import BlueZoneSkeleton from "./BlueZoneSkeleton.jsx";
 import TelemetryError from "./TelemetryError.jsx";
+import TelemetrySuccess from "./TelemetrySuccess.jsx";
 
 import {
   TELEMETRY_STATUS,
@@ -31,10 +32,8 @@ function TelemetryStatus({ view, onRetry }) {
         />
       );
 
-    case TELEMETRY_STATUS.SUCCESS: {
-      const squad = view.data;
-
-      if (!squad) {
+    case TELEMETRY_STATUS.SUCCESS:
+      if (!view.data) {
         return (
           <TelemetryError
             error="No squad data was returned."
@@ -44,78 +43,8 @@ function TelemetryStatus({ view, onRetry }) {
       }
 
       return (
-        <article
-          className="match-card"
-          aria-label={`${squad.name} match statistics`}
-        >
-          <div className="match-card-header">
-            <div>
-              <p className="eyebrow">
-                CURRENT SQUAD
-              </p>
-
-              <h3>{squad.name}</h3>
-            </div>
-
-            <span className="map-badge">
-              {squad.map}
-            </span>
-          </div>
-
-          <div className="stats-grid">
-            <div className="stat-box">
-              <span className="stat-label">
-                Match Phase
-              </span>
-
-              <strong className="stat-value">
-                {squad.phase}
-              </strong>
-            </div>
-
-            <div className="stat-box">
-              <span className="stat-label">
-                Alive
-              </span>
-
-              <strong className="stat-value">
-                {squad.alive}
-              </strong>
-            </div>
-
-            <div className="stat-box">
-              <span className="stat-label">
-                Kills
-              </span>
-
-              <strong className="stat-value">
-                {squad.kills}
-              </strong>
-            </div>
-
-            <div className="stat-box">
-              <span className="stat-label">
-                WWCD Probability
-              </span>
-
-              <strong className="stat-value">
-                {squad.wwcdProb}%
-              </strong>
-            </div>
-          </div>
-
-          <div className="status-section">
-            <span className="status-label">
-              Current Status
-            </span>
-
-            <span className="status-value">
-              {squad.status}
-            </span>
-          </div>
-        </article>
+        <TelemetrySuccess squad={view.data} />
       );
-    }
 
     default:
       return null;
