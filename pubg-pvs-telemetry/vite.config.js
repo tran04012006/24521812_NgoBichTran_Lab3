@@ -1,5 +1,5 @@
 
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 import { getSquadById } from "./src/data/pubgTelemetry.js";
@@ -59,13 +59,10 @@ function telemetryMockApi() {
             return;
           }
 
-          const unstableMaps = [
-            "Erangel",
-            "Miramar",
-          ];
-
           const shouldFail =
-            unstableMaps.includes(squad.map) &&
+            ["Erangel", "Miramar"].includes(
+              squad.map
+            ) &&
             Math.random() < 0.35;
 
           if (shouldFail) {
@@ -81,14 +78,9 @@ function telemetryMockApi() {
           }
 
           res.statusCode = 200;
-
-          res.end(
-            JSON.stringify({ data: squad })
-          );
+          res.end(JSON.stringify({ data: squad }));
         }, 1200);
 
-        // Clear the timer if the connection closes
-        // before the mock response is sent.
         res.on("close", () => {
           clearTimeout(timer);
         });
@@ -102,5 +94,14 @@ export default defineConfig({
 
   server: {
     port: 5173,
+  },
+
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.js"],
+    clearMocks: true,
+    restoreMocks: true,
+    css: true,
   },
 });
