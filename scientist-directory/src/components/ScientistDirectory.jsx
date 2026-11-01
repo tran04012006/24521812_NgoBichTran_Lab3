@@ -3,37 +3,22 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // ============================================
   // 1. Independent states
-  // ============================================
-
+  const [people, setPeople] = useState(SMART_PEOPLE);
   const [query, setQuery] = useState("");
   const [minIq, setMinIq] = useState(160);
   const [sortBy, setSortBy] = useState("iq-desc");
 
-  // ============================================
   // 2. Accessible IDs
-  // ============================================
-
   const searchId = useId();
   const minIqId = useId();
   const sortId = useId();
 
-  // ============================================
-  // 3. Normalize filter values
-  // ============================================
-
+  // 3. Derived values
   const normalizedQuery = query.trim().toLowerCase();
-
-  // An empty IQ input means no restriction
   const effectiveMinIq = minIq ?? 0;
 
-  // ============================================
-  // 4. Derived-state pipeline
-  // ============================================
-
-  const visiblePeople = SMART_PEOPLE
-    // Filter by name and minimum IQ
+  const visiblePeople = people
     .filter((person) => {
       const matchesName = person.name
         .toLowerCase()
@@ -43,18 +28,13 @@ function ScientistDirectory() {
 
       return matchesName && matchesIq;
     })
-
-    // Sort filtered results without mutation
     .toSorted((a, b) =>
       sortBy === "iq-desc"
         ? b.iq - a.iq
         : a.iq - b.iq
     );
 
-  // ============================================
-  // 5. Event handlers
-  // ============================================
-
+  // 4. Event handlers
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
   };
@@ -69,10 +49,14 @@ function ScientistDirectory() {
     setSortBy(event.target.value);
   };
 
-  // ============================================
-  // 6. Render
-  // ============================================
+  // 5. Immutable deletion
+  const handleDelete = (id) => {
+    setPeople((prevPeople) =>
+      prevPeople.filter((person) => person.id !== id)
+    );
+  };
 
+  // 6. Render
   return (
     <section
       className="scientist-directory"
@@ -80,24 +64,18 @@ function ScientistDirectory() {
     >
       <div className="directory-header">
         <h2>Scientist Directory</h2>
-
-        <p>
-          Explore famous scientists and pioneers.
-        </p>
+        <p>Explore famous scientists and pioneers.</p>
       </div>
 
-      {/* Interactive controls */}
       <form
         className="directory-controls"
         role="search"
         onSubmit={(event) => event.preventDefault()}
       >
-        {/* Name search */}
         <div className="form-group">
           <label htmlFor={searchId}>
             Search by scientist name
           </label>
-
           <input
             id={searchId}
             type="search"
@@ -107,12 +85,10 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* Minimum IQ filter */}
         <div className="form-group">
           <label htmlFor={minIqId}>
             Minimum IQ
           </label>
-
           <input
             id={minIqId}
             type="number"
@@ -123,12 +99,10 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* IQ sorting */}
         <div className="form-group">
           <label htmlFor={sortId}>
             Sort by IQ
           </label>
-
           <select
             id={sortId}
             value={sortBy}
@@ -137,7 +111,6 @@ function ScientistDirectory() {
             <option value="iq-desc">
               Highest IQ first
             </option>
-
             <option value="iq-asc">
               Lowest IQ first
             </option>
@@ -145,7 +118,6 @@ function ScientistDirectory() {
         </div>
       </form>
 
-      {/* Accessible live result count */}
       <p
         className="result-count"
         role="status"
@@ -157,7 +129,6 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
-      {/* Scientist list */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -171,21 +142,26 @@ function ScientistDirectory() {
                 <p>
                   <strong>Age:</strong> {person.age}
                 </p>
-
                 <p>
                   <strong>IQ:</strong> {person.iq}
                 </p>
               </div>
+
+              <button
+                type="button"
+                className="delete-button"
+                aria-label={`Delete ${person.name}`}
+                onClick={() => handleDelete(person.id)}
+              >
+                Delete
+              </button>
             </article>
           ))}
         </div>
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
-
-          <p>
-            Try changing your search or minimum IQ.
-          </p>
+          <p>Try changing your search or minimum IQ.</p>
         </div>
       )}
     </section>

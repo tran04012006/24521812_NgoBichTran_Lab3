@@ -170,3 +170,58 @@ TASK 4: IQ SORTING & DERIVED STATE PIPELINE
 └── 4.7 Git Version Control
     ├── Commit 7: Add controlled sort selector
     └── Commit 8: Implement immutable derived sorting
+TASK 5: IMMUTABLE DELETE & RESET
+│
+├── 5.1 Review Existing Architecture
+│   ├── Preserve React 19
+│   ├── Preserve SMART_PEOPLE
+│   ├── Preserve query state
+│   ├── Preserve minIq state
+│   ├── Preserve sortBy state
+│   └── Preserve derived-state pipeline
+│
+├── 5.2 Introduce Scientist Collection State
+│   ├── Create people state
+│   ├── Initialize from SMART_PEOPLE
+│   ├── Keep original data unchanged
+│   └── Derive visiblePeople from people
+│
+├── 5.3 Implement Immutable Deletion
+│   ├── Create handleDelete(id)
+│   ├── Use functional state update
+│   ├── Remove by stable ID
+│   ├── Preserve other scientists
+│   └── Add Delete button to each card
+│
+├── 5.4 Implement Reset
+│   ├── Create handleReset()
+│   ├── Restore original scientists
+│   ├── Clear search query
+│   ├── Restore minimum IQ to 160
+│   └── Restore descending sorting
+│
+├── 5.5 Accessibility
+│   ├── Use native button elements
+│   ├── Add descriptive aria-labels
+│   ├── Preserve stable React keys
+│   ├── Preserve live result count
+│   └── Preserve visible keyboard focus
+│
+├── 5.6 Styling
+│   ├── Create Delete button styles
+│   ├── Create Reset button styles
+│   ├── Maintain responsive layout
+│   └── Add hover and focus styles
+│
+├── 5.7 Verification
+│   ├── Delete one scientist
+│   ├── Verify only that scientist disappears
+│   ├── Delete while filters are active
+│   ├── Verify original data is unchanged
+│   ├── Reset after deletion
+│   ├── Verify search and filters reset
+│   ├── Check production build
+│   └── Check Git history
+│
+└── 5.8 Git Version Control
+    ├── Commit 9: Immutable deletion
