@@ -66,10 +66,14 @@ body {
 }
 
 /* ===========================
-   Search Controls
+   Search and IQ Controls
 =========================== */
 
 .directory-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: end;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -77,6 +81,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .form-group label {
@@ -87,6 +92,7 @@ body {
 
 .form-group input {
   width: 100%;
+  min-height: 44px;
   padding: 12px 14px;
   border: 1px solid #475569;
   border-radius: 8px;
@@ -107,7 +113,7 @@ body {
 }
 
 /* ===========================
-   Result Count
+   Live Result Count
 =========================== */
 
 .result-count {
@@ -185,6 +191,12 @@ body {
 @media (max-width: 768px) {
   .scientist-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .directory-controls {
+    grid-template-columns: 1fr;
   }
 }
 

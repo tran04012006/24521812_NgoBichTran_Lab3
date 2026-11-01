@@ -3,20 +3,44 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // Independent state
+  // ======================================
+  // 1. Independent React states
+  // ======================================
+
   const [query, setQuery] = useState("");
   const [minIq, setMinIq] = useState(160);
 
-  // Accessible input IDs
+  // ======================================
+  // 2. Accessible input IDs
+  // ======================================
+
   const searchId = useId();
   const minIqId = useId();
 
-  // Derived state: name search only for Commit 5
+  // ======================================
+  // 3. Derived values
+  // ======================================
+
+  // Normalize the search query
   const normalizedQuery = query.trim().toLowerCase();
 
-  const visiblePeople = SMART_PEOPLE.filter((person) =>
-    person.name.toLowerCase().includes(normalizedQuery)
-  );
+  // Treat an empty IQ input as no restriction
+  const effectiveMinIq = minIq ?? 0;
+
+  // Apply name and IQ filters together
+  const visiblePeople = SMART_PEOPLE.filter((person) => {
+    const matchesName = person.name
+      .toLowerCase()
+      .includes(normalizedQuery);
+
+    const matchesIq = person.iq >= effectiveMinIq;
+
+    return matchesName && matchesIq;
+  });
+
+  // ======================================
+  // 4. Event handlers
+  // ======================================
 
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
@@ -25,8 +49,13 @@ function ScientistDirectory() {
   const handleMinIqChange = (event) => {
     const value = event.target.valueAsNumber;
 
+    // Avoid storing NaN in React state
     setMinIq(Number.isNaN(value) ? null : value);
   };
+
+  // ======================================
+  // 5. Render UI
+  // ======================================
 
   return (
     <section
@@ -41,6 +70,7 @@ function ScientistDirectory() {
         </p>
       </div>
 
+      {/* Search and IQ controls */}
       <form
         className="directory-controls"
         role="search"
@@ -76,6 +106,7 @@ function ScientistDirectory() {
         </div>
       </form>
 
+      {/* Accessible live result count */}
       <p
         className="result-count"
         role="status"
@@ -87,6 +118,7 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
+      {/* Scientist cards or empty state */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -111,7 +143,10 @@ function ScientistDirectory() {
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
-          <p>Try changing your search criteria.</p>
+
+          <p>
+            Try changing your search or minimum IQ.
+          </p>
         </div>
       )}
     </section>
