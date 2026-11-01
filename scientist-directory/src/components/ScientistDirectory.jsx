@@ -3,20 +3,33 @@ import { useId, useState } from "react";
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
-  // 1. Independent states
+  // ============================================
+  // 1. Independent React states
+  // ============================================
+
   const [people, setPeople] = useState(SMART_PEOPLE);
   const [query, setQuery] = useState("");
   const [minIq, setMinIq] = useState(160);
   const [sortBy, setSortBy] = useState("iq-desc");
 
+  // ============================================
   // 2. Accessible IDs
+  // ============================================
+
   const searchId = useId();
   const minIqId = useId();
   const sortId = useId();
 
-  // 3. Derived values
+  // ============================================
+  // 3. Normalize input values
+  // ============================================
+
   const normalizedQuery = query.trim().toLowerCase();
   const effectiveMinIq = minIq ?? 0;
+
+  // ============================================
+  // 4. Derived-state pipeline
+  // ============================================
 
   const visiblePeople = people
     .filter((person) => {
@@ -34,7 +47,10 @@ function ScientistDirectory() {
         : a.iq - b.iq
     );
 
-  // 4. Event handlers
+  // ============================================
+  // 5. Input event handlers
+  // ============================================
+
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
   };
@@ -49,33 +65,64 @@ function ScientistDirectory() {
     setSortBy(event.target.value);
   };
 
-  // 5. Immutable deletion
+  // ============================================
+  // 6. Immutable deletion handler
+  // ============================================
+
   const handleDelete = (id) => {
     setPeople((prevPeople) =>
       prevPeople.filter((person) => person.id !== id)
     );
   };
 
-  // 6. Render
+  // ============================================
+  // 7. Reset handler
+  // ============================================
+
+  const handleReset = () => {
+    setPeople(SMART_PEOPLE);
+    setQuery("");
+    setMinIq(160);
+    setSortBy("iq-desc");
+  };
+
+  // ============================================
+  // 8. Component rendering
+  // ============================================
+
   return (
     <section
       className="scientist-directory"
       aria-label="Pioneer Directory"
     >
+      {/* Header */}
       <div className="directory-header">
-        <h2>Scientist Directory</h2>
-        <p>Explore famous scientists and pioneers.</p>
+        <div>
+          <h2>Scientist Directory</h2>
+          <p>Explore famous scientists and pioneers.</p>
+        </div>
+
+        <button
+          type="button"
+          className="reset-button"
+          onClick={handleReset}
+        >
+          Reset Directory
+        </button>
       </div>
 
+      {/* Interactive controls */}
       <form
         className="directory-controls"
         role="search"
         onSubmit={(event) => event.preventDefault()}
       >
+        {/* Search input */}
         <div className="form-group">
           <label htmlFor={searchId}>
             Search by scientist name
           </label>
+
           <input
             id={searchId}
             type="search"
@@ -85,10 +132,12 @@ function ScientistDirectory() {
           />
         </div>
 
+        {/* Minimum IQ input */}
         <div className="form-group">
           <label htmlFor={minIqId}>
             Minimum IQ
           </label>
+
           <input
             id={minIqId}
             type="number"
@@ -99,10 +148,12 @@ function ScientistDirectory() {
           />
         </div>
 
+        {/* Sorting select */}
         <div className="form-group">
           <label htmlFor={sortId}>
             Sort by IQ
           </label>
+
           <select
             id={sortId}
             value={sortBy}
@@ -111,6 +162,7 @@ function ScientistDirectory() {
             <option value="iq-desc">
               Highest IQ first
             </option>
+
             <option value="iq-asc">
               Lowest IQ first
             </option>
@@ -118,6 +170,7 @@ function ScientistDirectory() {
         </div>
       </form>
 
+      {/* Live result count */}
       <p
         className="result-count"
         role="status"
@@ -129,6 +182,7 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
+      {/* Scientist cards */}
       {visiblePeople.length > 0 ? (
         <div className="scientist-list">
           {visiblePeople.map((person) => (
@@ -142,6 +196,7 @@ function ScientistDirectory() {
                 <p>
                   <strong>Age:</strong> {person.age}
                 </p>
+
                 <p>
                   <strong>IQ:</strong> {person.iq}
                 </p>
@@ -161,7 +216,11 @@ function ScientistDirectory() {
       ) : (
         <div className="empty-state">
           <p>No scientists found.</p>
-          <p>Try changing your search or minimum IQ.</p>
+
+          <p>
+            Try changing your filters or resetting
+            the directory.
+          </p>
         </div>
       )}
     </section>
