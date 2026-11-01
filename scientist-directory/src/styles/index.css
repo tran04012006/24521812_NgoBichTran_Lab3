@@ -1,4 +1,8 @@
 
+/* ===========================
+   Global Styles
+=========================== */
+
 * {
   box-sizing: border-box;
 }
@@ -9,6 +13,10 @@ body {
   background-color: #0b1120;
   color: #f8fafc;
 }
+
+/* ===========================
+   Application Layout
+=========================== */
 
 .app-container {
   width: 100%;
@@ -32,6 +40,10 @@ body {
   font-size: 16px;
 }
 
+/* ===========================
+   Scientist Directory
+=========================== */
+
 .scientist-directory {
   background-color: #151e30;
   border: 1px solid #334155;
@@ -52,6 +64,62 @@ body {
   color: #94a3b8;
   margin: 0;
 }
+
+/* ===========================
+   Search Controls
+=========================== */
+
+.directory-controls {
+  margin-bottom: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background-color: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.form-group input::placeholder {
+  color: #94a3b8;
+}
+
+.form-group input:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-color: #818cf8;
+}
+
+/* ===========================
+   Result Count
+=========================== */
+
+.result-count {
+  margin: 0 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+/* ===========================
+   Scientist Cards
+=========================== */
 
 .scientist-list {
   display: grid;
@@ -87,6 +155,33 @@ body {
   color: #f8fafc;
 }
 
+/* ===========================
+   Empty State
+=========================== */
+
+.empty-state {
+  padding: 36px 20px;
+  background-color: #0f172a;
+  border: 1px dashed #475569;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 8px 0;
+  color: #cbd5e1;
+}
+
+.empty-state p:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+/* ===========================
+   Responsive Layout
+=========================== */
+
 @media (max-width: 768px) {
   .scientist-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -100,6 +195,10 @@ body {
 
   .app-header h1 {
     font-size: 24px;
+  }
+
+  .scientist-directory {
+    padding: 16px;
   }
 
   .scientist-list {
