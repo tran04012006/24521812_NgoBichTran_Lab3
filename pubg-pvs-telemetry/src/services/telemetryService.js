@@ -1,105 +1,65 @@
 
-import { getSquadById } from "../data/pubgTelemetry.js";
-
-const SIMULATED_DELAY = 1200;
-const PACKET_LOSS_RATE = 0.35;
-
-const UNSTABLE_MAPS = new Set([
-  "Erangel",
-  "Miramar",
-]);
-
-function createAbortError() {
-  return new DOMException(
-    "Telemetry request was canceled",
-    "AbortError"
-  );
-}
-
-export function fetchKraftonPubgTelemetry(
+export async function fetchKraftonPubgTelemetry(
   squadId,
   options = {}
 ) {
   const { signal } = options;
 
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(createAbortError());
-      return;
+  if (!squadId) {
+    throw new Error("Squad ID is required");
+  }
+
+  const endpoint =
+    `/api/telemetry/${encodeURIComponent(squadId)}`;
+
+  console.log(
+    `[Telemetry] Starting HTTP request: ${squadId}`
+  );
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "GET",
+      signal,
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message ||
+          `Telemetry request failed (${response.status})`
+      );
+    }
+
+    if (!result.data) {
+      throw new Error("Missing telemetry data");
     }
 
     console.log(
-      `[Telemetry] Starting request: ${squadId}`
+      `[Telemetry] Request successful: ${squadId}`
     );
 
-    let timeoutId;
-
-    const cleanup = () => {
-      clearTimeout(timeoutId);
-
-      signal?.removeEventListener(
-        "abort",
-        handleAbort
-      );
-    };
-
-    const handleAbort = () => {
-      cleanup();
-
+    return result.data;
+  } catch (error) {
+    if (signal?.aborted || error.name === "AbortError") {
       console.log(
         `[Telemetry] Request canceled: ${squadId}`
       );
 
-      reject(createAbortError());
-    };
+      throw new DOMException(
+        "Telemetry request canceled",
+        "AbortError"
+      );
+    }
 
-    signal?.addEventListener(
-      "abort",
-      handleAbort,
-      { once: true }
+    console.error(
+      `[Telemetry] Request failed: ${squadId}`,
+      error
     );
 
-    timeoutId = setTimeout(() => {
-      cleanup();
-
-      const squad = getSquadById(squadId);
-
-      if (!squad) {
-        console.error(
-          `[Telemetry] Squad not found: ${squadId}`
-        );
-
-        reject(new Error("Squad not found"));
-        return;
-      }
-
-      const isUnstableMap =
-        UNSTABLE_MAPS.has(squad.map);
-
-      const shouldFail =
-        isUnstableMap &&
-        Math.random() < PACKET_LOSS_RATE;
-
-      if (shouldFail) {
-        console.error(
-          `[Telemetry] Simulated network failure: ${squadId}`
-        );
-
-        reject(
-          new Error(
-            `Packet loss detected on ${squad.map}. ` +
-            "Unable to receive match telemetry."
-          )
-        );
-
-        return;
-      }
-
-      console.log(
-        `[Telemetry] Request successful: ${squadId}`
-      );
-
-      resolve({ ...squad });
-    }, SIMULATED_DELAY);
-  });
+    throw error;
+  }
 }

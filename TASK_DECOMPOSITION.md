@@ -115,3 +115,29 @@ recovery when telemetry requests fail.
 - Provide readable text contrast.
 - Support reduced-motion preferences.
 - Prevent horizontal overflow at 320px.
+
+## Task 6 — Final Verification [Current]
+
+### Task 6.1 — Real HTTP Mock API
+
+- Expose GET /api/telemetry/:squadId.
+- Serve mocked data using Vite middleware.
+- Simulate 1200ms latency.
+- Simulate 35% failures on Erangel/Miramar.
+- Use fetch with AbortSignal.
+- Prevent stale results during squad switches.
+- Restore useful keyboard focus after retry.
+- Keep the four-state machine.
+
+### Task 6.2 — Automated Testing
+
+- Configure Vitest with jsdom.
+- Configure React Testing Library.
+- Test IDLE and LOADING.
+- Test successful squad selection.
+- Test failures and retry.
+- Test request cancellation.
+- Test stale response prevention.
+- Test keyboard selection.
+- Test ARIA attributes.
+- Verify production build.

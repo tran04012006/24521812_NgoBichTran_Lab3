@@ -14,6 +14,7 @@ export const TELEMETRY_STATUS = {
 
 const initialView = {
   status: TELEMETRY_STATUS.IDLE,
+  squadId: null,
   data: null,
   error: null,
 };
@@ -31,6 +32,7 @@ export function useTelemetry(squadId, retryTick = 0) {
 
     setView({
       status: TELEMETRY_STATUS.LOADING,
+      squadId,
       data: null,
       error: null,
     });
@@ -45,6 +47,7 @@ export function useTelemetry(squadId, retryTick = 0) {
 
         setView({
           status: TELEMETRY_STATUS.SUCCESS,
+          squadId,
           data,
           error: null,
         });
@@ -59,6 +62,7 @@ export function useTelemetry(squadId, retryTick = 0) {
 
         setView({
           status: TELEMETRY_STATUS.ERROR,
+          squadId,
           data: null,
           error: error.message,
         });
@@ -68,6 +72,19 @@ export function useTelemetry(squadId, retryTick = 0) {
       controller.abort();
     };
   }, [squadId, retryTick]);
+
+  if (!squadId) {
+    return initialView;
+  }
+
+  if (view.squadId !== squadId) {
+    return {
+      status: TELEMETRY_STATUS.LOADING,
+      squadId,
+      data: null,
+      error: null,
+    };
+  }
 
   return view;
 }

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import SquadSelector from "./SquadSelector.jsx";
 import TelemetryStatus from "./TelemetryStatus.jsx";
@@ -19,6 +19,8 @@ function PubgMatchTelemetry() {
 
   const [retryTick, setRetryTick] = useState(0);
 
+  const selectorContainerRef = useRef(null);
+
   const view = useTelemetry(
     selectedSquadId,
     retryTick
@@ -36,6 +38,13 @@ function PubgMatchTelemetry() {
     if (!selectedSquadId) {
       return;
     }
+
+    const selectedButton =
+      selectorContainerRef.current?.querySelector(
+        '[aria-pressed="true"]'
+      );
+
+    selectedButton?.focus();
 
     setRetryTick((previous) => previous + 1);
   };
@@ -64,7 +73,6 @@ function PubgMatchTelemetry() {
       break;
 
     case TELEMETRY_STATUS.ERROR:
-      // The error component owns its role="alert".
       statusMessage = "";
       break;
 
@@ -93,10 +101,12 @@ function PubgMatchTelemetry() {
         </span>
       </div>
 
-      <SquadSelector
-        selectedSquadId={selectedSquadId}
-        onSelectSquad={handleSelectSquad}
-      />
+      <div ref={selectorContainerRef}>
+        <SquadSelector
+          selectedSquadId={selectedSquadId}
+          onSelectSquad={handleSelectSquad}
+        />
+      </div>
 
       <div
         className="screen-reader-only"
