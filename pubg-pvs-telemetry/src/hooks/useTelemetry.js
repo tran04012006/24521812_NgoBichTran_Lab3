@@ -18,7 +18,7 @@ const initialView = {
   error: null,
 };
 
-export function useTelemetry(squadId) {
+export function useTelemetry(squadId, retryTick = 0) {
   const [view, setView] = useState(initialView);
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function useTelemetry(squadId) {
     return () => {
       controller.abort();
     };
-  }, [squadId]);
+  }, [squadId, retryTick]);
 
   return view;
 }

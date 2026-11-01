@@ -1,11 +1,12 @@
 
 import BlueZoneSkeleton from "./BlueZoneSkeleton.jsx";
+import TelemetryError from "./TelemetryError.jsx";
 
 import {
   TELEMETRY_STATUS,
 } from "../hooks/useTelemetry.js";
 
-function TelemetryStatus({ view }) {
+function TelemetryStatus({ view, onRetry }) {
   switch (view.status) {
     case TELEMETRY_STATUS.IDLE:
       return (
@@ -24,16 +25,10 @@ function TelemetryStatus({ view }) {
 
     case TELEMETRY_STATUS.ERROR:
       return (
-        <section
-          className="telemetry-message error-message"
-          role="alert"
-        >
-          <h3>Telemetry Unavailable</h3>
-
-          <p>
-            {view.error || "Something went wrong."}
-          </p>
-        </section>
+        <TelemetryError
+          error={view.error}
+          onRetry={onRetry}
+        />
       );
 
     case TELEMETRY_STATUS.SUCCESS: {
@@ -41,13 +36,10 @@ function TelemetryStatus({ view }) {
 
       if (!squad) {
         return (
-          <section
-            className="telemetry-message error-message"
-            role="alert"
-          >
-            <h3>Missing Telemetry</h3>
-            <p>No squad data was returned.</p>
-          </section>
+          <TelemetryError
+            error="No squad data was returned."
+            onRetry={onRetry}
+          />
         );
       }
 
@@ -61,6 +53,7 @@ function TelemetryStatus({ view }) {
               <p className="eyebrow">
                 CURRENT SQUAD
               </p>
+
               <h3>{squad.name}</h3>
             </div>
 
@@ -74,6 +67,7 @@ function TelemetryStatus({ view }) {
               <span className="stat-label">
                 Match Phase
               </span>
+
               <strong className="stat-value">
                 {squad.phase}
               </strong>
@@ -83,6 +77,7 @@ function TelemetryStatus({ view }) {
               <span className="stat-label">
                 Alive
               </span>
+
               <strong className="stat-value">
                 {squad.alive}
               </strong>
@@ -92,6 +87,7 @@ function TelemetryStatus({ view }) {
               <span className="stat-label">
                 Kills
               </span>
+
               <strong className="stat-value">
                 {squad.kills}
               </strong>
@@ -101,6 +97,7 @@ function TelemetryStatus({ view }) {
               <span className="stat-label">
                 WWCD Probability
               </span>
+
               <strong className="stat-value">
                 {squad.wwcdProb}%
               </strong>

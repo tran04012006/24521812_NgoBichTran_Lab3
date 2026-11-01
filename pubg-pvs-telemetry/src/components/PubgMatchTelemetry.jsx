@@ -17,7 +17,12 @@ function PubgMatchTelemetry() {
   const [selectedSquadId, setSelectedSquadId] =
     useState(null);
 
-  const view = useTelemetry(selectedSquadId);
+  const [retryTick, setRetryTick] = useState(0);
+
+  const view = useTelemetry(
+    selectedSquadId,
+    retryTick
+  );
 
   const selectedSquad = PUBG_VN_SQUADS.find(
     (squad) => squad.id === selectedSquadId
@@ -25,6 +30,14 @@ function PubgMatchTelemetry() {
 
   const handleSelectSquad = (squadId) => {
     setSelectedSquadId(squadId);
+  };
+
+  const handleRetry = () => {
+    if (!selectedSquadId) {
+      return;
+    }
+
+    setRetryTick((previous) => previous + 1);
   };
 
   const isLoading =
@@ -69,7 +82,10 @@ function PubgMatchTelemetry() {
           </p>
         )}
 
-        <TelemetryStatus view={view} />
+        <TelemetryStatus
+          view={view}
+          onRetry={handleRetry}
+        />
       </div>
     </section>
   );
