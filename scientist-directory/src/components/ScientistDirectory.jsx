@@ -1,5 +1,11 @@
 
-import { useId, useState } from "react";
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { SMART_PEOPLE } from "../data/scientists.js";
 
 function ScientistDirectory() {
@@ -21,15 +27,19 @@ function ScientistDirectory() {
   const sortId = useId();
 
   // ============================================
-  // 3. Normalize input values
+  // 3. DOM and focus references
   // ============================================
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const effectiveMinIq = minIq ?? 0;
+  const listRef = useRef(null);
+  const resetRef = useRef(null);
+  const pendingFocusIndex = useRef(null);
 
   // ============================================
   // 4. Derived-state pipeline
   // ============================================
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const effectiveMinIq = minIq ?? 0;
 
   const visiblePeople = people
     .filter((person) => {
@@ -48,7 +58,41 @@ function ScientistDirectory() {
     );
 
   // ============================================
-  // 5. Input event handlers
+  // 5. Restore focus after deletion
+  // ============================================
+
+  useLayoutEffect(() => {
+    const deletedIndex = pendingFocusIndex.current;
+
+    if (deletedIndex === null) {
+      return;
+    }
+
+    // Clear the pending request
+    pendingFocusIndex.current = null;
+
+    // Get the Delete buttons still in the DOM
+    const remainingButtons =
+      listRef.current?.querySelectorAll(
+        ".delete-button"
+      );
+
+    if (remainingButtons?.length > 0) {
+      // Focus next item, or previous if last was deleted
+      const nextIndex = Math.min(
+        deletedIndex,
+        remainingButtons.length - 1
+      );
+
+      remainingButtons[nextIndex].focus();
+    } else {
+      // If no scientists are visible, focus Reset
+      resetRef.current?.focus();
+    }
+  }, [people]);
+
+  // ============================================
+  // 6. Input handlers
   // ============================================
 
   const handleSearchChange = (event) => {
@@ -66,20 +110,26 @@ function ScientistDirectory() {
   };
 
   // ============================================
-  // 6. Immutable deletion handler
+  // 7. Immutable deletion
   // ============================================
 
-  const handleDelete = (id) => {
+  const handleDelete = (id, index) => {
+    // Remember the position to restore keyboard focus
+    pendingFocusIndex.current = index;
+
+    // Update the scientist collection immutably
     setPeople((prevPeople) =>
       prevPeople.filter((person) => person.id !== id)
     );
   };
 
   // ============================================
-  // 7. Reset handler
+  // 8. Reset all state
   // ============================================
 
   const handleReset = () => {
+    pendingFocusIndex.current = null;
+
     setPeople(SMART_PEOPLE);
     setQuery("");
     setMinIq(160);
@@ -87,7 +137,7 @@ function ScientistDirectory() {
   };
 
   // ============================================
-  // 8. Component rendering
+  // 9. Render
   // ============================================
 
   return (
@@ -95,14 +145,17 @@ function ScientistDirectory() {
       className="scientist-directory"
       aria-label="Pioneer Directory"
     >
-      {/* Header */}
+      {/* Directory header */}
       <div className="directory-header">
         <div>
           <h2>Scientist Directory</h2>
-          <p>Explore famous scientists and pioneers.</p>
+          <p>
+            Explore famous scientists and pioneers.
+          </p>
         </div>
 
         <button
+          ref={resetRef}
           type="button"
           className="reset-button"
           onClick={handleReset}
@@ -111,13 +164,12 @@ function ScientistDirectory() {
         </button>
       </div>
 
-      {/* Interactive controls */}
+      {/* Search and filter controls */}
       <form
         className="directory-controls"
         role="search"
         onSubmit={(event) => event.preventDefault()}
       >
-        {/* Search input */}
         <div className="form-group">
           <label htmlFor={searchId}>
             Search by scientist name
@@ -132,7 +184,6 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* Minimum IQ input */}
         <div className="form-group">
           <label htmlFor={minIqId}>
             Minimum IQ
@@ -148,7 +199,6 @@ function ScientistDirectory() {
           />
         </div>
 
-        {/* Sorting select */}
         <div className="form-group">
           <label htmlFor={sortId}>
             Sort by IQ
@@ -170,11 +220,12 @@ function ScientistDirectory() {
         </div>
       </form>
 
-      {/* Live result count */}
+      {/* Screen-reader accessible result count */}
       <p
         className="result-count"
         role="status"
         aria-live="polite"
+        aria-atomic="true"
       >
         Found {visiblePeople.length}{" "}
         {visiblePeople.length === 1
@@ -182,10 +233,13 @@ function ScientistDirectory() {
           : "scientists"}
       </p>
 
-      {/* Scientist cards */}
+      {/* Scientist results */}
       {visiblePeople.length > 0 ? (
-        <div className="scientist-list">
-          {visiblePeople.map((person) => (
+        <div
+          className="scientist-list"
+          ref={listRef}
+        >
+          {visiblePeople.map((person, index) => (
             <article
               className="scientist-card"
               key={person.id}
@@ -206,7 +260,9 @@ function ScientistDirectory() {
                 type="button"
                 className="delete-button"
                 aria-label={`Delete ${person.name}`}
-                onClick={() => handleDelete(person.id)}
+                onClick={() =>
+                  handleDelete(person.id, index)
+                }
               >
                 Delete
               </button>
@@ -218,8 +274,8 @@ function ScientistDirectory() {
           <p>No scientists found.</p>
 
           <p>
-            Try changing your filters or resetting
-            the directory.
+            Try changing your filters or
+            resetting the directory.
           </p>
         </div>
       )}

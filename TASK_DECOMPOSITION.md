@@ -225,3 +225,65 @@ TASK 5: IMMUTABLE DELETE & RESET
 │
 └── 5.8 Git Version Control
     ├── Commit 9: Immutable deletion
+TASK 6: ACCESSIBILITY & FINAL VERIFICATION
+│
+├── 6.1 Review Existing Functionality
+│   ├── Verify name search
+│   ├── Verify numeric IQ filtering
+│   ├── Verify ascending/descending sorting
+│   ├── Verify immutable deletion
+│   ├── Verify Reset
+│   └── Verify live result count
+│
+├── 6.2 Improve Keyboard Accessibility
+│   ├── Preserve native input controls
+│   ├── Preserve accessible labels
+│   ├── Preserve visible focus indicators
+│   ├── Support Enter and Space for buttons
+│   └── Verify keyboard navigation order
+│
+├── 6.3 Manage Focus After Deletion
+│   ├── Add a ref for the scientist list
+│   ├── Track the position of the deleted card
+│   ├── Delete using stable scientist IDs
+│   ├── Focus the next remaining Delete button
+│   ├── Fall back to the previous button
+│   └── Focus Reset when no results remain
+│
+├── 6.4 Verify Screen Reader Accessibility
+│   ├── Preserve useId() labels
+│   ├── Preserve aria-label on Delete buttons
+│   ├── Preserve live result count
+│   ├── Announce deletion results
+│   └── Avoid unnecessary announcements
+│
+├── 6.5 Configure Automated Testing
+│   ├── Install Vitest
+│   ├── Install React Testing Library
+│   ├── Install user-event
+│   ├── Configure jsdom
+│   ├── Configure jest-dom matchers
+│   └── Add npm test script
+│
+├── 6.6 Implement Automated Tests
+│   ├── Test initial scientist records
+│   ├── Test case-insensitive search
+│   ├── Test minimum IQ filtering
+│   ├── Test ascending/descending sorting
+│   ├── Test immutable deletion
+│   ├── Test focus preservation
+│   ├── Test Reset
+│   ├── Test accessible labels
+│   └── Test render commits
+│
+├── 6.7 Final Verification
+│   ├── Run automated tests
+│   ├── Run production build
+│   ├── Test keyboard navigation manually
+│   ├── Inspect browser console
+│   ├── Inspect Git history
+│   └── Verify 12 meaningful commits
+│
+└── 6.8 Git Version Control
+    ├── Commit 11: Accessibility improvements
+    └── Commit 12: Automated tests and verification
