@@ -26,3 +26,21 @@ Vietnam Series Live Telemetry Dashboard.
 - Create a dark esports-themed interface.
 - Make the dashboard responsive.
 - Use reusable CSS classes.
+
+## Task 2 — Four-State Machine 
+
+### Task 2.1 — State Management
+
+- Create the four-state model.
+- Implement a reusable custom hook.
+- Simulate asynchronous telemetry requests.
+- Separate fetching logic from rendering logic.
+- Show the correct UI for every state.
+
+### Task 2.2 — Squad Selector and UI
+- Render four squads as buttons.
+- Track the selected squad using useState.
+- Load telemetry when a squad is selected.
+- Display loading and success states.
+- Provide an accessible error state.
+- Maintain responsive styling.
