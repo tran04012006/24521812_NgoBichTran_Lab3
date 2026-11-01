@@ -1,0 +1,4 @@
+- Use react 19
+- There are more than 10 commits
+- Before every task, provide me TASK_DECOMPOSITION.md of this task (tree)
+- Provide me full code of each tasks
