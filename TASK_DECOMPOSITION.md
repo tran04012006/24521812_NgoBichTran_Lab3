@@ -8,3 +8,9 @@
 - [ ] 1.7 Add accessible placeholder drum buttons.
 - [ ] 1.8 Verify the development server and production build.
 - [ ] 1.9 Create two meaningful Git commits.
+## Task 2: Drum Kit Interface
+- Create DrumPad component.
+- Create DrumKit component.
+- Define drum metadata and physical key mapping.
+- Create a responsive pad layout.
+- Add focus and activation styling.
