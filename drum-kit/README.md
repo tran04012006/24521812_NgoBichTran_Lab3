@@ -1,77 +1,73 @@
 
 # Production Studio Drum Kit
 
-React 19 + Vite homework project (Task 3).
+React 19 + Vite homework project.
+Task 4 builds on the playable Task 3 drum kit.
 
-## Requirements
+## Run
 
-- Node.js 20.19+ or 22.12+
-- npm
-- Modern browser with Web Audio API support
-
-## Installation
+Requires Node.js 20.19+ or 22.12+ and npm.
 
 ```bash
 npm install
-```
-
-## Development
-
-```bash
 npm run dev
 ```
 
-## Production build
+## Production Build
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Task 3 Controls
-
-### Mouse and Touch
-Click or tap a pad to play its sound.
-
-### Keyboard
+## Controls
 
 | Key | Drum |
-|-----|------|
+|---|---|
 | W | Kick |
 | A | Snare |
-| S | Closed Hi-Hat |
-| D | Open Hi-Hat |
+| S | Hi-Hat |
+| D | Open Hat |
 | J | Tom |
 | K | Clap |
 | L | Crash |
 
-Focused buttons also support Enter and Space.
+Use mouse or touch to activate pads.
+Use Tab and Enter/Space on focused buttons.
 
-## Keyboard Safety
+Global shortcuts ignore:
+- Held-key repeats.
+- Ctrl/Alt/Meta combinations.
+- Typing fields.
 
-- Uses event.code instead of keyCode.
-- Prevents held-key auto-repeat.
-- Ignores input, textarea, select,
-  and contenteditable targets.
-- Ignores Ctrl, Alt, and Meta shortcuts.
-- Removes keyboard listeners during cleanup.
+## Task 4 Accessibility Features
 
-## Audio
+- Accessible buttons and visible keyboard focus.
+- Temporary activation feedback.
+- Screen-reader hit announcements.
+- Recent-hit history (maximum 12).
+- Clear-history button.
+- Live Web Audio AnalyserNode meter.
+- Digital RMS sound-level readings in dBFS.
+- Responsive layout.
 
-Drum sounds are synthesized using the Web Audio API.
+The digital audio meter is not a calibrated
+acoustic sound-pressure meter.
 
-No external sound files are required.
+## Verification
 
-Some browsers require user interaction before
-audio playback is permitted.
+Manual testing with NVDA/VoiceOver is required.
 
-## Project Progress
+WCAG 2.2 AA and Lighthouse Accessibility 100
+are targets, not yet verified.
 
-- Task 1: Project setup
-- Task 2: Drum Kit UI
-- Task 3: Audio and keyboard integration
-- Task 4: Hit history and sound-level visualization
-- Task 5: Automated testing
-- Task 6: Final Lighthouse verification
+## Project Roadmap
 
-See task_decomposition.md for the full plan.
+Task 1: Project setup
+Task 2: Drum kit UI
+Task 3: Audio and keyboard integration
+Task 4: Accessibility and visual feedback
+Task 5: Automated testing
+Task 6: Final verification
+
+See task_decomposition.md for detailed subtasks.

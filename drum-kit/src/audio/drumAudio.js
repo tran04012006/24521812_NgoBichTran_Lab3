@@ -1,6 +1,8 @@
 
 let context = null;
 let noiseBuffer = null;
+let analyser = null;
+let levelSamples = null;
 
 function getContext() {
   const AudioContextClass =
@@ -15,6 +17,12 @@ function getContext() {
   if (!context || context.state === "closed") {
     context = new AudioContextClass();
     noiseBuffer = null;
+
+    analyser = context.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.connect(context.destination);
+
+    levelSamples = new Float32Array(analyser.fftSize);
   }
 
   return context;
@@ -54,7 +62,12 @@ function tone(
   const gain = ctx.createGain();
 
   oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, now);
+
+  oscillator.frequency.setValueAtTime(
+    frequency,
+    now
+  );
+
   oscillator.frequency.exponentialRampToValueAtTime(
     Math.max(20, endFrequency),
     now + duration
@@ -64,12 +77,14 @@ function tone(
     Math.max(0.001, volume),
     now
   );
+
   gain.gain.exponentialRampToValueAtTime(
     0.001,
     now + duration
   );
 
-  oscillator.connect(gain).connect(ctx.destination);
+  oscillator.connect(gain).connect(analyser);
+
   oscillator.start(now);
   oscillator.stop(now + duration + 0.01);
 
@@ -90,18 +105,24 @@ function noise(
   }
 ) {
   const start = ctx.currentTime + delay;
+
   const source = ctx.createBufferSource();
   const filter = ctx.createBiquadFilter();
   const gain = ctx.createGain();
 
   source.buffer = getNoiseBuffer(ctx);
   filter.type = filterType;
-  filter.frequency.setValueAtTime(cutoff, start);
+
+  filter.frequency.setValueAtTime(
+    cutoff,
+    start
+  );
 
   gain.gain.setValueAtTime(
     Math.max(0.001, volume),
     start
   );
+
   gain.gain.exponentialRampToValueAtTime(
     0.001,
     start + duration
@@ -110,7 +131,7 @@ function noise(
   source
     .connect(filter)
     .connect(gain)
-    .connect(ctx.destination);
+    .connect(analyser);
 
   source.start(start);
   source.stop(start + duration + 0.01);
@@ -222,11 +243,53 @@ export async function playDrum(drumId) {
   renderSound(ctx);
 }
 
-export async function closeDrumAudio() {
-  if (context && context.state !== "closed") {
-    await context.close();
+// Measures RMS digital audio level in dBFS.
+// This is not an acoustic dB SPL measurement.
+
+export function getAudioLevelDbfs() {
+  if (
+    !context ||
+    context.state !== "running" ||
+    !analyser ||
+    !levelSamples
+  ) {
+    return -60;
   }
+
+  analyser.getFloatTimeDomainData(levelSamples);
+
+  let sumOfSquares = 0;
+
+  for (const sample of levelSamples) {
+    sumOfSquares += sample * sample;
+  }
+
+  const rms = Math.sqrt(
+    sumOfSquares / levelSamples.length
+  );
+
+  if (rms <= 0.001) {
+    return -60;
+  }
+
+  return Math.max(
+    -60,
+    Math.min(0, 20 * Math.log10(rms))
+  );
+}
+
+export async function closeDrumAudio() {
+  const closingContext = context;
 
   context = null;
   noiseBuffer = null;
+  analyser = null;
+  levelSamples = null;
+
+  if (
+    closingContext &&
+    closingContext.state !== "closed"
+  ) {
+    await closingContext.close();
+  }
 }

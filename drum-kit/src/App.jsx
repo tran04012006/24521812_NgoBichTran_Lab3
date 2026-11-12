@@ -12,10 +12,11 @@ export default function App() {
         <h1>Production Studio Drum Kit</h1>
 
         <p className="description">
-          Play seven synthesized drum sounds by
-          clicking a pad or using physical keyboard
-          shortcuts. Hit history and the sound-level
-          meter follow in Task 4.
+          Play seven synthesized drums with a mouse,
+          touch, or keyboard. Follow the recent-hit
+          history and live digital sound-level meter
+          for feedback that does not depend on
+          hearing the sounds.
         </p>
       </header>
 
