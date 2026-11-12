@@ -198,3 +198,100 @@
 |       |
 |       +-- Commit 9: Accessibility foundation
 |       +-- Commit 10: Performance and responsive UI
++-- Task 6: Automated Testing & Final Verification [IN PROGRESS]
+|   |
+|   +-- 6.1 Configure Automated Testing
+|   |   |
+|   |   +-- Update package.json
+|   |   +-- Configure Vitest in vite.config.js
+|   |   +-- Install React Testing Library
+|   |   +-- Install jest-dom matchers
+|   |   +-- Configure jsdom environment
+|   |   +-- Create test/setup.js
+|   |
+|   +-- 6.2 Timer Utility Tests
+|   |   |
+|   |   +-- Test timestamp calculations
+|   |   +-- Test positive server offset
+|   |   +-- Test negative server offset
+|   |   +-- Test expired deadlines
+|   |   +-- Test invalid input
+|   |   +-- Test HH:MM:SS formatting
+|   |
+|   +-- 6.3 Countdown Hook Tests
+|   |   |
+|   |   +-- Test initial remaining time
+|   |   +-- Test timer progression
+|   |   +-- Test background-tab recovery
+|   |   +-- Test deadline changes
+|   |   +-- Test server offset changes
+|   |   +-- Test expiration
+|   |   +-- Test interval cleanup
+|   |
+|   +-- 6.4 Claim API Tests
+|   |   |
+|   |   +-- Test successful claim
+|   |   +-- Test authoritative stock deduction
+|   |   +-- Test HTTP 409 conflict
+|   |   +-- Test stale inventory conflict
+|   |   +-- Test sold-out inventory
+|   |   +-- Test unknown reward
+|   |   +-- Test request cancellation
+|   |
+|   +-- 6.5 Optimistic Claim Hook Tests
+|   |   |
+|   |   +-- Test immediate deduction
+|   |   +-- Test successful reconciliation
+|   |   +-- Test HTTP 409 rollback
+|   |   +-- Test duplicate-click protection
+|   |   +-- Test sold-out handling
+|   |   +-- Test cleanup on unmount
+|   |
+|   +-- 6.6 Leaderboard Tests
+|   |   |
+|   |   +-- Test total points
+|   |   +-- Test name search
+|   |   +-- Test category filtering
+|   |   +-- Test WWCD sorting
+|   |   +-- Test placement sorting
+|   |   +-- Test kill-point sorting
+|   |   +-- Test ascending/descending
+|   |   +-- Test deterministic tie-breaking
+|   |   +-- Test kill-feed filtering
+|   |   +-- Test leaderboard UI integration
+|   |
+|   +-- 6.7 Virtualization Tests
+|   |   |
+|   |   +-- Test initial visible range
+|   |   +-- Test scroll calculations
+|   |   +-- Test overscan
+|   |   +-- Test empty data
+|   |   +-- Test filtering reset
+|   |   +-- Test keyboard scrolling
+|   |   +-- Test container remount
+|   |   +-- Test observer cleanup
+|   |
+|   +-- 6.8 Correct Discovered Issues
+|   |   |
+|   |   +-- Reconnect resize observer on remount
+|   |   +-- Reconcile scroll position
+|   |   +-- Preserve Task 5 behavior
+|   |
+|   +-- 6.9 AI Failure Audit
+|   |   |
+|   |   +-- Create AI_FAILURE_AUDIT.md
+|   |   +-- Document timer-drift bug
+|   |   +-- Document viewport mismatch bug
+|   |   +-- Document observer-remount bug
+|   |   +-- Explain root causes
+|   |   +-- Explain corrections
+|   |   +-- Reference verification tests
+|   |
+|   +-- 6.10 Final Verification
+|       |
+|       +-- Run automated tests
+|       +-- Run production build
+|       +-- Verify React 19
+|       +-- Check Git history
+|       +-- Verify minimum 12 commits
+|       +-- Prepare submission
