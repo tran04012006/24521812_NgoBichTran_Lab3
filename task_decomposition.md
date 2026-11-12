@@ -26,7 +26,7 @@ Task 1
 │   ├── 4.2 Style black and white keys
 │   ├── 4.3 Add horizontal scrolling
 │   ├── 4.4 Highlight selected key
-│   └── 4.5 Display note information
+│   └── 4.5 Display the note information
 │
 ├── 5. Verification
 │   ├── 5.1 Verify exactly 88 keys
