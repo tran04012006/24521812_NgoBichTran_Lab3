@@ -36,3 +36,9 @@
 - Test accessibility behavior.
 - Verify responsive layouts.
 
+## Task 6: Final Verification
+- Run Lighthouse audits.
+- Address accessibility issues.
+- Verify production build.
+- Review project documentation.
+- Prepare final submission.

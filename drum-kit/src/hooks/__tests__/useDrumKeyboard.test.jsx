@@ -104,15 +104,13 @@ describe("useDrumKeyboard", () => {
       <KeyboardHarness onTrigger={onTrigger} />
     );
 
-    const targets = [
+    for (const target of [
       getByRole("textbox", { name: "Name" }),
       getByRole("textbox", { name: "Message" }),
       getByRole("combobox", { name: "Choice" }),
       getByTestId("editor"),
       getByTestId("editor-child"),
-    ];
-
-    for (const target of targets) {
+    ]) {
       fireEvent.keyDown(target, {
         code: "KeyW",
         bubbles: true,
@@ -132,7 +130,9 @@ describe("useDrumKeyboard", () => {
       />
     );
 
-    fireEvent.keyDown(window, { code: "KeyW" });
+    fireEvent.keyDown(window, {
+      code: "KeyW",
+    });
 
     expect(onTrigger).not.toHaveBeenCalled();
   });
@@ -146,7 +146,45 @@ describe("useDrumKeyboard", () => {
 
     view.unmount();
 
-    fireEvent.keyDown(window, { code: "KeyW" });
+    fireEvent.keyDown(window, {
+      code: "KeyW",
+    });
+
+    expect(onTrigger).not.toHaveBeenCalled();
+  });
+});
+
+describe("Task 6 keyboard safeguards", () => {
+  it("does not trigger for already-handled shortcuts", () => {
+    const onTrigger = vi.fn();
+
+    render(
+      <KeyboardHarness onTrigger={onTrigger} />
+    );
+
+    const event = new KeyboardEvent("keydown", {
+      code: "KeyW",
+      bubbles: true,
+      cancelable: true,
+    });
+
+    event.preventDefault();
+    window.dispatchEvent(event);
+
+    expect(onTrigger).not.toHaveBeenCalled();
+  });
+
+  it("does not trigger during IME composition", () => {
+    const onTrigger = vi.fn();
+
+    render(
+      <KeyboardHarness onTrigger={onTrigger} />
+    );
+
+    fireEvent.keyDown(window, {
+      code: "KeyW",
+      isComposing: true,
+    });
 
     expect(onTrigger).not.toHaveBeenCalled();
   });

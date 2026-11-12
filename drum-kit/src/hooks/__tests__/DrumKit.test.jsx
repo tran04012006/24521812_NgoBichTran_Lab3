@@ -51,10 +51,7 @@ describe("DrumKit", () => {
     for (const key of keys) {
       expect(
         within(group).getByRole("button", {
-          name: new RegExp(
-            `physical key ${key}$`,
-            "i"
-          ),
+          name: new RegExp(`physical key ${key}$`, "i"),
         })
       ).toBeVisible();
     }
@@ -66,9 +63,7 @@ describe("DrumKit", () => {
     ).toHaveAttribute("aria-valuemin", "-60");
 
     expect(
-      screen.getByText(
-        /not real-world sound pressure/i
-      )
+      screen.getByText(/not real-world sound pressure/i)
     ).toBeVisible();
   });
 
@@ -83,13 +78,13 @@ describe("DrumKit", () => {
 
     await user.click(kick);
 
-    await waitFor(() =>
-      expect(playDrum).toHaveBeenCalledWith("kick")
-    );
+    await waitFor(() => {
+      expect(playDrum).toHaveBeenCalledWith("kick");
+    });
 
-    await waitFor(() =>
-      expect(kick).toHaveClass("is-active")
-    );
+    await waitFor(() => {
+      expect(kick).toHaveClass("is-active");
+    });
 
     expect(
       screen.getByText(/hit 1: kick/i)
@@ -115,9 +110,9 @@ describe("DrumKit", () => {
     await user.keyboard("{Enter}");
     await user.keyboard(" ");
 
-    await waitFor(() =>
-      expect(playDrum).toHaveBeenCalledTimes(2)
-    );
+    await waitFor(() => {
+      expect(playDrum).toHaveBeenCalledTimes(2);
+    });
 
     expect(playDrum).toHaveBeenNthCalledWith(
       1,
@@ -142,9 +137,9 @@ describe("DrumKit", () => {
       repeat: true,
     });
 
-    await waitFor(() =>
-      expect(playDrum).toHaveBeenCalledTimes(1)
-    );
+    await waitFor(() => {
+      expect(playDrum).toHaveBeenCalledTimes(1);
+    });
 
     expect(playDrum).toHaveBeenCalledWith("crash");
   });
@@ -173,7 +168,6 @@ describe("DrumKit", () => {
     ).getAllByRole("listitem");
 
     expect(entries).toHaveLength(12);
-
     expect(entries[0]).toHaveTextContent("Snare");
     expect(entries[1]).toHaveTextContent("Kick");
 
@@ -230,5 +224,38 @@ describe("DrumKit", () => {
     view.unmount();
 
     expect(closeDrumAudio).toHaveBeenCalled();
+  });
+});
+
+describe("Task 6 final visible feedback", () => {
+  it("shows the last played drum visually without duplicating its live announcement", async () => {
+    const user = userEvent.setup();
+
+    render(<DrumKit />);
+
+    const visual = screen.getByText(
+      /last played: none yet/i
+    );
+
+    expect(visual).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /kick drum pad/i,
+      })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/last played: kick \(w\)/i)
+      ).toHaveAttribute("aria-hidden", "true");
+    });
+
+    expect(
+      screen.getByRole("status")
+    ).toHaveTextContent("Hit 1: Kick.");
   });
 });
