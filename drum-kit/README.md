@@ -1,36 +1,45 @@
 
 # Production Studio Drum Kit
 
-Homework 1: Modernizing a legacy drum kit using
-React 19, Vite, keyboard event handling, and
-WCAG 2.2 AA accessibility practices.
+A React 19 + Vite project for HW1.
+
+The project aims to meet relevant WCAG 2.2 AA
+accessibility requirements and reach a Lighthouse
+Accessibility score of 100 after verification.
 
 ## Requirements
 
 - Node.js 20.19+ or 22.12+
-  (or a newer compatible version)
 - npm
 
-## Start
+## Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Production build
+## Build
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Progress
+## Task 2 Functionality
 
-Task 1: Project scaffolding and requirements.
+- Seven drum pads: W, A, S, D, J, K, L.
+- Mouse and touch pad selection.
+- Enter/Space selection on focused buttons.
+- Selected state exposed through aria-pressed.
+- Responsive CSS grid.
+- Visible keyboard focus.
 
-Audio and drum-pad interaction are not
-implemented yet.
+## Coming Later
 
-See `task_decomposition.md` for the
-development roadmap.
+- Drum audio playback
+- Global physical keyboard shortcuts
+- Accessible hit history
+- Visual sound-level meter
+
+See task_decomposition.md for the roadmap.
