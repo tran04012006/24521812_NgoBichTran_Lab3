@@ -63,7 +63,8 @@ button:disabled {
 }
 
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+input:focus-visible {
   outline: 3px solid var(--orange);
   outline-offset: 4px;
 }
@@ -126,7 +127,6 @@ a:focus-visible {
 .brand-text {
   display: flex;
   flex-direction: column;
-
   line-height: 1;
 }
 
@@ -139,7 +139,6 @@ a:focus-visible {
 
 .brand-text small {
   margin-top: 4px;
-
   color: var(--orange);
 
   font-size: 10px;
@@ -238,7 +237,6 @@ a:focus-visible {
 .hero-content {
   position: relative;
   z-index: 1;
-
   padding: 70px 0;
 }
 
@@ -360,6 +358,7 @@ a:focus-visible {
 
 .arena-section {
   padding: 75px 0 25px;
+  scroll-margin-top: 25px;
 }
 
 .section-heading {
@@ -512,7 +511,6 @@ a:focus-visible {
   flex-direction: column;
 
   min-width: 0;
-
   overflow: hidden;
 
   background: var(--surface);
@@ -569,7 +567,6 @@ a:focus-visible {
   place-items: center;
 
   min-height: 145px;
-
   margin: 0 18px;
 
   background:
@@ -619,7 +616,6 @@ a:focus-visible {
   align-items: center;
 
   gap: 12px;
-
   padding: 12px 0;
 
   border-top: 1px solid var(--border);
@@ -671,6 +667,131 @@ a:focus-visible {
 
   font-size: 11px;
   font-weight: 800;
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.claim-button:not(:disabled):hover {
+  background: var(--orange-light);
+  transform: translateY(-2px);
+}
+
+.claim-button:disabled {
+  opacity: 0.55;
+  transform: none;
+}
+
+/* =========================
+   OPTIMISTIC CLAIM
+========================= */
+
+.claim-simulation {
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--border);
+}
+
+.simulation-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #cbd5e1;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.simulation-label input {
+  width: 15px;
+  height: 15px;
+
+  margin: 0;
+
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
+.simulation-label input:disabled {
+  cursor: not-allowed;
+}
+
+.simulation-description {
+  display: block;
+
+  margin: 9px 0 0 24px;
+
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.claim-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-top: 16px;
+  padding: 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  font-size: 11px;
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
+}
+
+.claim-feedback-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 19px;
+  height: 19px;
+
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.claim-feedback-pending {
+  color: #ffca70;
+  background: rgba(255, 151, 0, 0.08);
+  border-color: rgba(255, 151, 0, 0.25);
+}
+
+.claim-feedback-pending .claim-feedback-icon {
+  background: rgba(255, 151, 0, 0.2);
+}
+
+.claim-feedback-success {
+  color: #65e8b3;
+  background: rgba(40, 217, 154, 0.08);
+  border-color: rgba(40, 217, 154, 0.25);
+}
+
+.claim-feedback-success .claim-feedback-icon {
+  background: rgba(40, 217, 154, 0.2);
+}
+
+.claim-feedback-conflict,
+.claim-feedback-error {
+  color: #ff9797;
+  background: rgba(255, 103, 103, 0.08);
+  border-color: rgba(255, 103, 103, 0.3);
+}
+
+.claim-feedback-conflict .claim-feedback-icon,
+.claim-feedback-error .claim-feedback-icon {
+  background: rgba(255, 103, 103, 0.2);
 }
 
 /* =========================
@@ -682,16 +803,11 @@ a:focus-visible {
   scroll-margin-top: 25px;
 }
 
-.arena-section {
-  scroll-margin-top: 25px;
-}
-
 .preview-tag {
   padding: 8px 12px;
 
   color: var(--orange);
   border: 1px solid var(--border);
-
   border-radius: 5px;
 
   font-size: 10px;
@@ -829,7 +945,6 @@ a:focus-visible {
 
 .site-footer {
   border-top: 1px solid var(--border);
-
   background: #080c15;
 }
 
@@ -840,7 +955,6 @@ a:focus-visible {
 
   flex-wrap: wrap;
   gap: 20px;
-
   padding: 30px 0;
 }
 
