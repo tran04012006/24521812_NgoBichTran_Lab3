@@ -1,0 +1,4 @@
+- Commit more than 10 times
+- Give me task_decomposition.md before any task
+- Use react 19
+- Give me full code after each task
