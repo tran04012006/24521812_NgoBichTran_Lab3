@@ -14,15 +14,23 @@ const PianoKey = memo(function PianoKey({
   whiteKeyIndex,
   isSelected,
   isPlaying,
+  isTabStop,
   onSelect,
   onNoteOn,
   onNoteOff,
+  onNavigate,
 }) {
   const keyClassName = [
     "piano-key",
-    isBlack ? "piano-key--black" : "piano-key--white",
-    isSelected ? "piano-key--selected" : "",
-    isPlaying ? "piano-key--playing" : "",
+    isBlack
+      ? "piano-key--black"
+      : "piano-key--white",
+    isSelected
+      ? "piano-key--selected"
+      : "",
+    isPlaying
+      ? "piano-key--playing"
+      : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -36,8 +44,6 @@ const PianoKey = memo(function PianoKey({
     : undefined;
 
   const handlePointerDown = (event) => {
-    // Only the primary mouse button should start notes.
-    // All touch pointers are allowed.
     if (
       event.pointerType === "mouse" &&
       event.button !== 0
@@ -45,18 +51,25 @@ const PianoKey = memo(function PianoKey({
       return;
     }
 
-    const sourceId = `pointer:${event.pointerId}`;
+    const sourceId =
+      `pointer:${event.pointerId}`;
 
     event.currentTarget.setPointerCapture(
       event.pointerId
     );
 
     onSelect(midi);
-    onNoteOn(midi, frequency, sourceId);
+
+    onNoteOn(
+      midi,
+      frequency,
+      sourceId
+    );
   };
 
   const handlePointerUp = (event) => {
-    const sourceId = `pointer:${event.pointerId}`;
+    const sourceId =
+      `pointer:${event.pointerId}`;
 
     onNoteOff(midi, sourceId);
 
@@ -72,19 +85,46 @@ const PianoKey = memo(function PianoKey({
   };
 
   const handlePointerCancel = (event) => {
-    const sourceId = `pointer:${event.pointerId}`;
-
-    onNoteOff(midi, sourceId);
+    onNoteOff(
+      midi,
+      `pointer:${event.pointerId}`
+    );
   };
 
   const handleLostPointerCapture = (event) => {
-    const sourceId = `pointer:${event.pointerId}`;
-
-    // Safe even when pointerup already released it.
-    onNoteOff(midi, sourceId);
+    onNoteOff(
+      midi,
+      `pointer:${event.pointerId}`
+    );
   };
 
   const handleKeyDown = (event) => {
+    // Navigate through the entire piano.
+    if (event.code === "ArrowRight") {
+      event.preventDefault();
+      onNavigate(midi, 1);
+      return;
+    }
+
+    if (event.code === "ArrowLeft") {
+      event.preventDefault();
+      onNavigate(midi, -1);
+      return;
+    }
+
+    if (event.code === "Home") {
+      event.preventDefault();
+      onNavigate(midi, "first");
+      return;
+    }
+
+    if (event.code === "End") {
+      event.preventDefault();
+      onNavigate(midi, "last");
+      return;
+    }
+
+    // Enter and Space activate a focused key.
     if (
       event.code !== "Space" &&
       event.code !== "Enter"
@@ -92,17 +132,20 @@ const PianoKey = memo(function PianoKey({
       return;
     }
 
+    event.preventDefault();
+
+    // Ignore browser key auto-repeat.
     if (event.repeat) {
-      event.preventDefault();
       return;
     }
 
-    event.preventDefault();
-
-    const sourceId = `button:${midi}`;
-
     onSelect(midi);
-    onNoteOn(midi, frequency, sourceId);
+
+    onNoteOn(
+      midi,
+      frequency,
+      `button:${midi}`
+    );
   };
 
   const handleKeyUp = (event) => {
@@ -115,13 +158,19 @@ const PianoKey = memo(function PianoKey({
 
     event.preventDefault();
 
-    onNoteOff(midi, `button:${midi}`);
+    onNoteOff(
+      midi,
+      `button:${midi}`
+    );
   };
 
   const handleBlur = () => {
-    // Avoid stuck notes if focus moves away
-    // before keyup occurs.
-    onNoteOff(midi, `button:${midi}`);
+    // Prevent stuck notes when focus changes
+    // before the Enter/Space key is released.
+    onNoteOff(
+      midi,
+      `button:${midi}`
+    );
   };
 
   return (
@@ -129,7 +178,9 @@ const PianoKey = memo(function PianoKey({
       type="button"
       className={keyClassName}
       style={keyStyle}
-      aria-label={`${noteName}, ${frequency.toFixed(2)} hertz`}
+      data-piano-midi={midi}
+      tabIndex={isTabStop ? 0 : -1}
+      aria-label={`${noteName}, MIDI ${midi}, ${frequency.toFixed(2)} hertz`}
       aria-pressed={isPlaying}
       title={`${noteName} | MIDI ${midi}`}
       onPointerDown={handlePointerDown}
@@ -141,7 +192,10 @@ const PianoKey = memo(function PianoKey({
       onBlur={handleBlur}
       onClick={() => onSelect(midi)}
     >
-      <span className="piano-key__label">
+      <span
+        className="piano-key__label"
+        aria-hidden="true"
+      >
         {noteName}
       </span>
     </button>

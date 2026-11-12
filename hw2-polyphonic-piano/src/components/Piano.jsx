@@ -18,12 +18,16 @@ import {
   WHITE_KEY_COUNT,
   BLACK_KEY_COUNT,
   TOTAL_PIANO_WIDTH,
+  MIN_MIDI,
+  MAX_MIDI,
 } from "../utils/notes.js";
 
 import {
   CODE_TO_MIDI,
   isTypingTarget,
 } from "../utils/keyboardMapping.js";
+
+const MAX_VOICES = 8;
 
 const WHITE_KEYS = PIANO_KEYS.filter(
   (key) => !key.isBlack
@@ -34,50 +38,65 @@ const BLACK_KEYS = PIANO_KEYS.filter(
 );
 
 const NOTE_BY_MIDI = new Map(
-  PIANO_KEYS.map((note) => [note.midi, note])
+  PIANO_KEYS.map((note) => [
+    note.midi,
+    note,
+  ])
 );
 
-const MAX_VOICES = 8;
-
 function Piano() {
-  // Persistent audio and recording engines.
   const synthRef = useRef(null);
   const sequencerRef = useRef(null);
 
-  // MIDI -> Set of input source identifiers.
+  // MIDI -> Set of input owners.
   const noteOwnersRef = useRef(new Map());
 
-  // Physical keyboard keys currently held.
-  const pressedKeyboardCodesRef = useRef(new Set());
-
-  // Piano UI state.
-  const [selectedMidi, setSelectedMidi] = useState(null);
-
-  const [activeNotes, setActiveNotes] = useState(
-    () => new Set()
+  const pressedKeyboardCodesRef = useRef(
+    new Set()
   );
 
-  const [lastStolenMidi, setLastStolenMidi] = useState(null);
+  const mountedRef = useRef(false);
 
-  // Recording and playback UI state.
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedMidi, setSelectedMidi] =
+    useState(null);
 
-  const [recordedEvents, setRecordedEvents] = useState([]);
+  const [activeNotes, setActiveNotes] =
+    useState(() => new Set());
 
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [lastStolenMidi, setLastStolenMidi] =
+    useState(null);
 
-  // Initialize engine instances.
-  // React 19 Strict Mode can repeat effect setup
-  // and cleanup in development.
+  const [isRecording, setIsRecording] =
+    useState(false);
+
+  const [isPlaying, setIsPlaying] =
+    useState(false);
+
+  const [recordedEvents, setRecordedEvents] =
+    useState([]);
+
+  const [playbackSpeed, setPlaybackSpeed] =
+    useState(1);
+
+  const [announcement, setAnnouncement] =
+    useState("Piano ready");
+
+  // Initialize engines for each React effect lifecycle.
   useEffect(() => {
-    const synth = new PolyphonicSynth(MAX_VOICES);
+    mountedRef.current = true;
+
+    const synth =
+      new PolyphonicSynth(MAX_VOICES);
+
     const sequencer = new Sequencer();
 
     synthRef.current = synth;
     sequencerRef.current = sequencer;
 
     return () => {
+      mountedRef.current = false;
+
+      // Cancel sequencer before closing audio.
       sequencer.dispose();
       synth.dispose();
 
@@ -94,52 +113,118 @@ function Piano() {
     };
   }, []);
 
-  const handleSelectNote = useCallback((midi) => {
-    setSelectedMidi(midi);
+  // Update a live announcement only when mounted.
+  const announce = useCallback((message) => {
+    if (mountedRef.current) {
+      setAnnouncement(message);
+    }
   }, []);
 
-  const syncActiveNotes = useCallback(() => {
-    const synth = synthRef.current;
-
-    if (!synth) {
-      return;
-    }
-
-    setActiveNotes(
-      new Set(synth.getActiveMidiNotes())
+  const handleSelectNote = useCallback((midi) => {
+    setSelectedMidi((previous) =>
+      previous === midi ? previous : midi
     );
   }, []);
 
-  // Start a note for one particular input source.
+  // Move focus across all 88 MIDI notes.
+  const handleNavigate = useCallback(
+    (midi, direction) => {
+      let nextMidi = midi;
+
+      if (direction === "first") {
+        nextMidi = MIN_MIDI;
+      } else if (direction === "last") {
+        nextMidi = MAX_MIDI;
+      } else {
+        nextMidi = Math.max(
+          MIN_MIDI,
+          Math.min(
+            MAX_MIDI,
+            midi + direction
+          )
+        );
+      }
+
+      if (nextMidi === midi) {
+        return;
+      }
+
+      setSelectedMidi(nextMidi);
+
+      const nextKey = document.querySelector(
+        `[data-piano-midi="${nextMidi}"]`
+      );
+
+      nextKey?.focus();
+
+      const note = NOTE_BY_MIDI.get(nextMidi);
+
+      if (note) {
+        announce(
+          `${note.noteName}, MIDI ${nextMidi}`
+        );
+      }
+    },
+    [announce]
+  );
+
+  // Read the synth's actual voice allocation.
+  const syncActiveNotes = useCallback(() => {
+    const synth = synthRef.current;
+
+    if (!synth || !mountedRef.current) {
+      return;
+    }
+
+    const nextNotes = new Set(
+      synth.getActiveMidiNotes()
+    );
+
+    setActiveNotes((previous) => {
+      if (
+        previous.size === nextNotes.size &&
+        [...nextNotes].every((midi) =>
+          previous.has(midi)
+        )
+      ) {
+        return previous;
+      }
+
+      return nextNotes;
+    });
+  }, []);
+
+  // Start a note on behalf of one input source.
   const handleNoteOn = useCallback(
     (midi, frequency, sourceId) => {
       const synth = synthRef.current;
       const sequencer = sequencerRef.current;
 
-      if (!synth || !sourceId) {
+      if (
+        !synth ||
+        !sourceId ||
+        !NOTE_BY_MIDI.has(midi)
+      ) {
         return false;
       }
 
-      if (!NOTE_BY_MIDI.has(midi)) {
-        return false;
-      }
+      const ownersMap =
+        noteOwnersRef.current;
 
-      const ownersMap = noteOwnersRef.current;
-      const existingOwners = ownersMap.get(midi);
+      const existingOwners =
+        ownersMap.get(midi);
 
-      // A source cannot own the same note twice.
+      // Prevent duplicate ownership.
       if (existingOwners?.has(sourceId)) {
         return true;
       }
 
-      // Another input already holds this note.
-      // Add ownership without retriggering audio.
+      // Multiple sources can hold one voice.
       if (existingOwners) {
         existingOwners.add(sourceId);
         return true;
       }
 
-      // First owner: allocate an audio voice.
       const result = synth.noteOn(
         midi,
         frequency
@@ -149,8 +234,7 @@ function Piano() {
         return false;
       }
 
-      // Close the recording of any stolen voice
-      // before removing its ownership.
+      // Remove ownership of a stolen voice.
       if (result.stolenMidi !== null) {
         if (sequencer?.isRecording) {
           sequencer.recordNoteOff(
@@ -160,7 +244,9 @@ function Piano() {
 
         ownersMap.delete(result.stolenMidi);
 
-        setLastStolenMidi(result.stolenMidi);
+        setLastStolenMidi(
+          result.stolenMidi
+        );
       }
 
       ownersMap.set(
@@ -168,8 +254,7 @@ function Piano() {
         new Set([sourceId])
       );
 
-      // Record manual note starts, but do not
-      // record notes generated by playback.
+      // Do not record playback-generated notes.
       if (
         sequencer?.isRecording &&
         !sourceId.startsWith("playback:")
@@ -187,70 +272,75 @@ function Piano() {
     [syncActiveNotes]
   );
 
-  // Remove one input source's ownership.
+  // Release one input's ownership.
   const handleNoteOff = useCallback(
     (midi, sourceId) => {
-      const ownersMap = noteOwnersRef.current;
+      const ownersMap =
+        noteOwnersRef.current;
+
       const owners = ownersMap.get(midi);
 
-      if (!owners || !owners.has(sourceId)) {
+      if (
+        !owners ||
+        !owners.has(sourceId)
+      ) {
         return;
       }
 
       owners.delete(sourceId);
 
-      // Do not release audio while other
-      // input sources still hold this note.
       if (owners.size > 0) {
         return;
       }
 
+      // Last owner released.
       ownersMap.delete(midi);
 
       const synth = synthRef.current;
       const sequencer = sequencerRef.current;
 
-      // Record the actual end of a manual note.
       if (sequencer?.isRecording) {
         sequencer.recordNoteOff(midi);
       }
 
-      if (synth) {
-        synth.noteOff(midi);
-      }
+      synth?.noteOff(midi);
 
       syncActiveNotes();
     },
     [syncActiveNotes]
   );
 
-  // Stop all audio and clear all input ownership.
+  // Immediately silence every note.
   const handleStopAll = useCallback(() => {
     const synth = synthRef.current;
     const sequencer = sequencerRef.current;
 
-    // Cancel scheduled playback, if any.
     sequencer?.stopPlayback();
 
-    // Close recorded notes that are still active.
+    // Close notes being recorded.
     if (sequencer?.isRecording) {
-      for (const midi of noteOwnersRef.current.keys()) {
+      for (const midi of
+        noteOwnersRef.current.keys()) {
         sequencer.recordNoteOff(midi);
       }
     }
 
+    // Silence both active and releasing voices.
     synth?.stopAll();
 
     noteOwnersRef.current.clear();
     pressedKeyboardCodesRef.current.clear();
 
     setActiveNotes(new Set());
-  }, []);
 
-  // Physical computer keyboard support.
+    announce("All notes stopped");
+  }, [announce]);
+
+  // Register physical keyboard listeners.
   useEffect(() => {
     const handleKeyDown = (event) => {
-      const midi = CODE_TO_MIDI[event.code];
+      const midi =
+        CODE_TO_MIDI[event.code];
 
       if (midi === undefined) {
         return;
@@ -308,7 +398,8 @@ function Piano() {
     };
 
     const handleKeyUp = (event) => {
-      const midi = CODE_TO_MIDI[event.code];
+      const midi =
+        CODE_TO_MIDI[event.code];
 
       if (midi === undefined) {
         return;
@@ -335,9 +426,9 @@ function Piano() {
     };
 
     const releaseKeyboardNotes = () => {
-      const pressedCodes = Array.from(
-        pressedKeyboardCodesRef.current
-      );
+      const pressedCodes = [
+        ...pressedKeyboardCodesRef.current,
+      ];
 
       pressedKeyboardCodesRef.current.clear();
 
@@ -406,26 +497,21 @@ function Piano() {
     handleSelectNote,
   ]);
 
-  // Start a new recording.
+  // Recording controls.
   const handleStartRecording = useCallback(() => {
     const sequencer = sequencerRef.current;
 
-    if (!sequencer) {
-      return;
-    }
-
-    const started = sequencer.startRecording();
-
-    if (!started) {
+    if (!sequencer?.startRecording()) {
       return;
     }
 
     setRecordedEvents([]);
     setIsRecording(true);
     setLastStolenMidi(null);
-  }, []);
 
-  // Finish recording and display the events.
+    announce("Recording started");
+  }, [announce]);
+
   const handleStopRecording = useCallback(() => {
     const sequencer = sequencerRef.current;
 
@@ -433,62 +519,61 @@ function Piano() {
       return;
     }
 
-    const events = sequencer.stopRecording();
+    const events =
+      sequencer.stopRecording();
 
     setRecordedEvents(events);
     setIsRecording(false);
-  }, []);
 
-  // Play the current recorded sequence.
+    announce(
+      `Recording stopped. ${events.length} events saved`
+    );
+  }, [announce]);
+
   const handlePlay = useCallback(async () => {
     const sequencer = sequencerRef.current;
 
     if (
       !sequencer ||
       sequencer.isPlaying ||
-      sequencer.isRecording
+      sequencer.isRecording ||
+      sequencer.getEvents().length === 0
     ) {
       return;
     }
 
-    if (sequencer.getEvents().length === 0) {
-      return;
-    }
-
     setIsPlaying(true);
+    announce("Playback started");
 
     try {
-      await sequencer.play({
+      const completed = await sequencer.play({
         speed: playbackSpeed,
-
-        onNoteOn: (
-          midi,
-          frequency,
-          sourceId
-        ) => {
-          return handleNoteOn(
-            midi,
-            frequency,
-            sourceId
-          );
-        },
-
-        onNoteOff: (midi, sourceId) => {
-          handleNoteOff(
-            midi,
-            sourceId
-          );
-        },
+        onNoteOn: handleNoteOn,
+        onNoteOff: handleNoteOff,
       });
+
+      if (
+        mountedRef.current &&
+        sequencerRef.current === sequencer
+      ) {
+        announce(
+          completed
+            ? "Playback completed"
+            : "Playback stopped"
+        );
+      }
     } catch (error) {
       console.error(
-        "Sequencer playback failed:",
+        "Playback error:",
         error
       );
+
+      announce("Playback error");
     } finally {
-      // Do not update UI for a sequencer that
-      // has already been replaced on unmount.
-      if (sequencerRef.current === sequencer) {
+      if (
+        mountedRef.current &&
+        sequencerRef.current === sequencer
+      ) {
         setIsPlaying(false);
       }
     }
@@ -496,31 +581,34 @@ function Piano() {
     playbackSpeed,
     handleNoteOn,
     handleNoteOff,
+    announce,
   ]);
 
   const handleStopPlayback = useCallback(() => {
-    const sequencer = sequencerRef.current;
+    const stopped =
+      sequencerRef.current?.stopPlayback();
 
-    sequencer?.stopPlayback();
-  }, []);
+    if (stopped) {
+      announce("Stopping playback");
+    }
+  }, [announce]);
 
   const handleClearRecording = useCallback(() => {
     const sequencer = sequencerRef.current;
 
-    if (!sequencer) {
-      return;
-    }
-
-    if (sequencer.clearRecording()) {
+    if (sequencer?.clearRecording()) {
       setRecordedEvents([]);
+      announce("Recording cleared");
     }
-  }, []);
+  }, [announce]);
 
-  const handleSpeedChange = useCallback((speed) => {
-    setPlaybackSpeed(speed);
-  }, []);
+  const handleSpeedChange = useCallback(
+    (speed) => {
+      setPlaybackSpeed(speed);
+    },
+    []
+  );
 
-  // Read-only note information for display.
   const selectedNote =
     NOTE_BY_MIDI.get(selectedMidi) ?? null;
 
@@ -530,16 +618,18 @@ function Piano() {
   const activeVoiceCount = activeNotes.size;
 
   return (
-    <section className="piano-panel">
-      {/* Piano header */}
+    <section
+      className="piano-panel"
+      aria-label="88-key polyphonic piano"
+    >
       <div className="piano-panel__header">
         <div>
           <h2>88-Key Polyphonic Piano</h2>
 
           <p>
-            Play using your physical keyboard,
-            mouse, or touchscreen.
-            Record and replay your music.
+            Play notes using your keyboard,
+            mouse, or touchscreen. Record
+            and replay your music.
           </p>
         </div>
 
@@ -650,7 +740,8 @@ function Piano() {
           <div className="active-notes__list">
             {activeNotes.size > 0 ? (
               Array.from(activeNotes).map((midi) => {
-                const note = NOTE_BY_MIDI.get(midi);
+                const note =
+                  NOTE_BY_MIDI.get(midi);
 
                 return (
                   <span
@@ -670,7 +761,7 @@ function Piano() {
         </div>
       </div>
 
-      {/* Recording and playback */}
+      {/* FIFO sequencer */}
       <RecorderControls
         isRecording={isRecording}
         isPlaying={isPlaying}
@@ -684,14 +775,25 @@ function Piano() {
         onClearRecording={handleClearRecording}
       />
 
-      {/* Physical keyboard guide */}
+      {/* Keyboard guide */}
       <KeyboardGuide activeNotes={activeNotes} />
 
-      {/* Virtual piano */}
+      {/* Accessible piano navigation */}
+      <p
+        id="piano-instructions"
+        className="piano-scroll-hint"
+      >
+        Use Left and Right Arrow keys to move
+        between piano notes. Press Home for A0,
+        End for C8, and Enter or Space to play
+        the focused note.
+      </p>
+
       <div
         className="piano-scroll"
         role="region"
         aria-label="Scrollable 88-key piano"
+        aria-describedby="piano-instructions"
         tabIndex={0}
       >
         <div
@@ -711,9 +813,15 @@ function Piano() {
                 isPlaying={
                   activeNotes.has(key.midi)
                 }
+                isTabStop={
+                  selectedMidi === null
+                    ? key.midi === MIN_MIDI
+                    : selectedMidi === key.midi
+                }
                 onSelect={handleSelectNote}
                 onNoteOn={handleNoteOn}
                 onNoteOff={handleNoteOff}
+                onNavigate={handleNavigate}
               />
             ))}
           </div>
@@ -729,9 +837,15 @@ function Piano() {
                 isPlaying={
                   activeNotes.has(key.midi)
                 }
+                isTabStop={
+                  selectedMidi === null
+                    ? key.midi === MIN_MIDI
+                    : selectedMidi === key.midi
+                }
                 onSelect={handleSelectNote}
                 onNoteOn={handleNoteOn}
                 onNoteOff={handleNoteOff}
+                onNavigate={handleNavigate}
               />
             ))}
           </div>
@@ -739,11 +853,12 @@ function Piano() {
       </div>
 
       <p className="piano-scroll-hint">
-        Scroll to explore all 88 piano keys.
-        Hold a key to play, then release to stop.
+        Scroll horizontally to explore all
+        88 notes. Multiple notes can sound
+        simultaneously.
       </p>
 
-      {/* Selected note */}
+      {/* Selected note information */}
       <div className="selected-note-panel">
         <h3>Selected Note</h3>
 
@@ -781,10 +896,30 @@ function Piano() {
           </div>
         ) : (
           <p className="selected-note-empty">
-            No key selected. Play a piano note
-            to begin.
+            No note selected. Play a piano
+            key to begin.
           </p>
         )}
+      </div>
+
+      {/* Screen-reader announcement */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          width: "1px",
+          height: "1px",
+          padding: 0,
+          margin: "-1px",
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          whiteSpace: "nowrap",
+          border: 0,
+        }}
+      >
+        {announcement}
       </div>
     </section>
   );
