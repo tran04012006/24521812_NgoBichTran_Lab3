@@ -14,3 +14,10 @@
 - Define drum metadata and physical key mapping.
 - Create a responsive pad layout.
 - Add focus and activation styling.
+## Task 3: Audio and Keyboard Integration
+- Implement audio playback.
+- Create useDrumKeyboard hook.
+- Handle event.code keyboard mapping.
+- Prevent repeated keydown events.
+- Ignore shortcuts in editable controls.
+- Clean up event listeners correctly.
