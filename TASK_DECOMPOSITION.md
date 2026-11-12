@@ -28,3 +28,11 @@
 - Real waveform measurement
 - Temporary pad feedback
 - Keyboard accessibility
+## Task 5: Testing & Responsive Design
+- Test drum pad interactions.
+- Test keyboard mapping.
+- Test auto-repeat protection.
+- Test input focus isolation.
+- Test accessibility behavior.
+- Verify responsive layouts.
+
