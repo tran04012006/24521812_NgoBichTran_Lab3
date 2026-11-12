@@ -1,5 +1,6 @@
 
 import React, {
+  useCallback,
   useDeferredValue,
   useMemo,
   useState,
@@ -11,13 +12,14 @@ import {
 } from "../utils/leaderboardUtils";
 
 /**
- * PUBG Kill-Feed Filter.
+ * Accessible PUBG kill-feed filter.
  *
- * Task 4:
- * - Search attacker/victim/weapon
- * - Filter KILL / KNOCK events
- * - Display timestamps
- * - Show empty result feedback
+ * Task 5:
+ * - Deferred search
+ * - Accessible filter labels
+ * - Result count announcements
+ * - Descriptive event text
+ * - Keyboard-scrollable event list
  */
 export default function KillFeedFilter({
   events = [],
@@ -31,10 +33,9 @@ export default function KillFeedFilter({
   const deferredSearch =
     useDeferredValue(search);
 
-  /**
-   * Recalculate only when the input
-   * data or filter conditions change.
-   */
+  const isSearching =
+    search !== deferredSearch;
+
   const filteredEvents = useMemo(
     () =>
       filterKillFeed(events, {
@@ -48,13 +49,35 @@ export default function KillFeedFilter({
     ]
   );
 
-  const isSearching =
-    search !== deferredSearch;
+  const handleSearchChange =
+    useCallback((event) => {
+      setSearch(
+        event.target.value
+      );
+    }, []);
 
-  const handleClear = () => {
-    setSearch("");
-    setEventType("ALL");
-  };
+  const handleEventTypeChange =
+    useCallback((event) => {
+      setEventType(
+        event.target.value
+      );
+    }, []);
+
+  const handleClear = useCallback(
+    () => {
+      setSearch("");
+      setEventType("ALL");
+    },
+    []
+  );
+
+  const hasActiveFilters =
+    search !== "" ||
+    eventType !== "ALL";
+
+  const resultAnnouncement =
+    `${filteredEvents.length} of ` +
+    `${events.length} kill-feed events.`;
 
   return (
     <section
@@ -83,7 +106,11 @@ export default function KillFeedFilter({
       </div>
 
       <div className="kill-feed-card">
-        <div className="kill-feed-toolbar">
+        <div
+          className="kill-feed-toolbar"
+          role="group"
+          aria-label="Kill-feed filters"
+        >
           <div className="filter-field">
             <label
               htmlFor="kill-feed-search"
@@ -96,10 +123,18 @@ export default function KillFeedFilter({
               type="search"
               value={search}
               placeholder="Squad or weapon..."
-              onChange={(event) =>
-                setSearch(event.target.value)
-              }
+              onChange={handleSearchChange}
+              aria-controls="kill-feed-results"
+              aria-describedby="kill-search-help"
             />
+
+            <span
+              id="kill-search-help"
+              className="sr-only"
+            >
+              Search attacker squad,
+              victim squad or weapon.
+            </span>
           </div>
 
           <div className="filter-field">
@@ -112,11 +147,8 @@ export default function KillFeedFilter({
             <select
               id="kill-feed-type"
               value={eventType}
-              onChange={(event) =>
-                setEventType(
-                  event.target.value
-                )
-              }
+              onChange={handleEventTypeChange}
+              aria-controls="kill-feed-results"
             >
               <option value="ALL">
                 All Events
@@ -136,16 +168,16 @@ export default function KillFeedFilter({
             type="button"
             className="filter-reset-button"
             onClick={handleClear}
-            disabled={
-              !search &&
-              eventType === "ALL"
-            }
+            disabled={!hasActiveFilters}
           >
             RESET
           </button>
         </div>
 
-        <div className="kill-feed-summary">
+        <div
+          className="kill-feed-summary"
+          aria-hidden="true"
+        >
           <span>
             {filteredEvents.length} of{" "}
             {events.length} events
@@ -158,61 +190,94 @@ export default function KillFeedFilter({
           )}
         </div>
 
+        <div
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {!isSearching &&
+            resultAnnouncement}
+        </div>
+
         {filteredEvents.length > 0 ? (
-          <div className="kill-feed-list">
+          <div
+            id="kill-feed-results"
+            className="kill-feed-list"
+            role="region"
+            aria-label="PUBG kill-feed events"
+            tabIndex={0}
+          >
             {filteredEvents.map(
-              (event) => (
-                <article
-                  className="kill-feed-event"
-                  key={event.id}
-                >
-                  <div className="kill-feed-event-main">
-                    <span className="kill-attacker">
-                      {event.attacker}
-                    </span>
+              (event) => {
+                const action =
+                  event.eventType === "KILL"
+                    ? "eliminated"
+                    : "knocked down";
 
-                    <span
-                      className={
-                        event.eventType === "KILL"
-                          ? "event-type event-kill"
-                          : "event-type event-knock"
-                      }
-                    >
-                      {event.eventType}
-                    </span>
+                const readableEvent =
+                  `${event.attacker} ` +
+                  `${action} ` +
+                  `${event.victim} ` +
+                  `using ${event.weapon}`;
 
-                    <span className="kill-victim">
-                      {event.victim}
-                    </span>
-                  </div>
+                return (
+                  <article
+                    className="kill-feed-event"
+                    key={event.id}
+                    aria-label={readableEvent}
+                  >
+                    <div className="kill-feed-event-main">
+                      <span className="kill-attacker">
+                        {event.attacker}
+                      </span>
 
-                  <div className="kill-feed-event-meta">
-                    <span className="weapon-label">
-                      {event.weapon}
-                    </span>
+                      <span
+                        className={
+                          event.eventType === "KILL"
+                            ? "event-type event-kill"
+                            : "event-type event-knock"
+                        }
+                      >
+                        {event.eventType}
+                      </span>
 
-                    <time
-                      dateTime={event.timestamp}
-                    >
-                      {formatEventTime(
-                        event.timestamp
-                      )}{" "}
-                      ICT
-                    </time>
-                  </div>
-                </article>
-              )
+                      <span className="kill-victim">
+                        {event.victim}
+                      </span>
+                    </div>
+
+                    <div className="kill-feed-event-meta">
+                      <span className="weapon-label">
+                        {event.weapon}
+                      </span>
+
+                      <time
+                        dateTime={event.timestamp}
+                      >
+                        {formatEventTime(
+                          event.timestamp
+                        )}{" "}
+                        ICT
+                      </time>
+                    </div>
+                  </article>
+                );
+              }
             )}
           </div>
         ) : (
-          <div className="empty-results">
+          <div
+            id="kill-feed-results"
+            className="empty-results"
+          >
             <strong>
               No matching events
             </strong>
 
             <p>
-              Try changing your search
-              or event type.
+              Try another squad name,
+              weapon, or event type.
             </p>
 
             <button

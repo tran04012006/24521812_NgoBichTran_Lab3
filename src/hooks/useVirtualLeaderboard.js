@@ -1,25 +1,27 @@
 
 import {
-  useEffect,
-  useMemo,
-  useState,
   useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
+  useState,
 } from "react";
 
 /**
- * Custom fixed-height list virtualization.
+ * Responsive virtualized list hook.
  *
- * Only rows within the visible scroll
- * window plus overscan are rendered.
- *
- * @param {Object} options
- * @param {number} options.itemCount
- * @param {number} options.rowHeight
- * @param {number} options.viewportHeight
- * @param {number} options.overscan
- * @param {string} options.resetKey
+ * Features:
+ * - Fixed-height row virtualization
+ * - Actual viewport measurement
+ * - ResizeObserver support
+ * - Keyboard scrolling
+ * - Overscan buffering
+ * - Scroll position clamping
+ * - Filter/sort reset
+ * - Effect cleanup
  */
+
 export default function useVirtualLeaderboard({
   itemCount,
   rowHeight = 60,
@@ -27,21 +29,49 @@ export default function useVirtualLeaderboard({
   overscan = 5,
   resetKey = "",
 }) {
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef =
+    useRef(null);
 
   const [scrollTop, setScrollTop] =
     useState(0);
 
+  const [measuredHeight, setMeasuredHeight] =
+    useState(viewportHeight);
+
   /**
-   * Keep scrollTop within the list's
-   * possible scroll range.
+   * Use safe positive dimensions.
+   */
+  const safeItemCount = Math.max(
+    0,
+    itemCount
+  );
+
+  const safeRowHeight = Math.max(
+    1,
+    rowHeight
+  );
+
+  const safeOverscan = Math.max(
+    0,
+    Math.floor(overscan)
+  );
+
+  const effectiveViewportHeight =
+    Math.max(
+      1,
+      measuredHeight
+    );
+
+  /**
+   * Total virtual content height.
    */
   const totalHeight =
-    itemCount * rowHeight;
+    safeItemCount * safeRowHeight;
 
   const maxScrollTop = Math.max(
     0,
-    totalHeight - viewportHeight
+    totalHeight -
+      effectiveViewportHeight
   );
 
   const safeScrollTop = Math.min(
@@ -50,13 +80,68 @@ export default function useVirtualLeaderboard({
   );
 
   /**
-   * Determine which rows can be seen.
+   * Measure the actual scroll container.
    *
-   * The overscan buffer reduces visible
-   * popping during small scroll movements.
+   * ResizeObserver detects changes caused
+   * by screen resizing and responsive CSS.
+   */
+  useEffect(() => {
+    const element =
+      scrollContainerRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const updateHeight = () => {
+      const nextHeight =
+        element.clientHeight;
+
+      if (nextHeight > 0) {
+        setMeasuredHeight(
+          (previous) =>
+            previous === nextHeight
+              ? previous
+              : nextHeight
+        );
+      }
+    };
+
+    updateHeight();
+
+    if (
+      typeof ResizeObserver !== "undefined"
+    ) {
+      const observer =
+        new ResizeObserver(updateHeight);
+
+      observer.observe(element);
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+
+    window.addEventListener(
+      "resize",
+      updateHeight
+    );
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        updateHeight
+      );
+    };
+  }, []);
+
+  /**
+   * Compute the visible indices.
+   *
+   * endIndex is exclusive.
    */
   const virtualRange = useMemo(() => {
-    if (itemCount === 0) {
+    if (safeItemCount === 0) {
       return {
         startIndex: 0,
         endIndex: 0,
@@ -67,32 +152,37 @@ export default function useVirtualLeaderboard({
     }
 
     const firstVisibleIndex = Math.floor(
-      safeScrollTop / rowHeight
+      safeScrollTop /
+        safeRowHeight
     );
 
     const visibleRowCount = Math.ceil(
-      viewportHeight / rowHeight
+      effectiveViewportHeight /
+        safeRowHeight
     );
 
     const startIndex = Math.max(
       0,
-      firstVisibleIndex - overscan
+      firstVisibleIndex -
+        safeOverscan
     );
 
     const endIndex = Math.min(
-      itemCount,
+      safeItemCount,
       firstVisibleIndex +
         visibleRowCount +
-        overscan +
+        safeOverscan +
         1
     );
 
     const topPadding =
-      startIndex * rowHeight;
+      startIndex *
+      safeRowHeight;
 
     const bottomPadding = Math.max(
       0,
-      (itemCount - endIndex) * rowHeight
+      (safeItemCount - endIndex) *
+        safeRowHeight
     );
 
     return {
@@ -104,17 +194,15 @@ export default function useVirtualLeaderboard({
         endIndex - startIndex,
     };
   }, [
-    itemCount,
-    rowHeight,
-    viewportHeight,
-    overscan,
+    safeItemCount,
+    safeRowHeight,
+    safeOverscan,
+    effectiveViewportHeight,
     safeScrollTop,
   ]);
 
   /**
-   * Update scroll position.
-   *
-   * A scroll event is passed by React.
+   * Native scroll handler.
    */
   const handleScroll = useCallback(
     (event) => {
@@ -126,13 +214,143 @@ export default function useVirtualLeaderboard({
   );
 
   /**
-   * Reset the viewport when filters,
-   * searching, or sorting changes.
+   * Scroll to a specific position.
    *
-   * A new result set should begin
-   * at the first ranked squad.
+   * Scroll positions are clamped so
+   * keyboard navigation cannot move
+   * beyond the available content.
    */
-  useEffect(() => {
+  const scrollToPosition = useCallback(
+    (position) => {
+      const element =
+        scrollContainerRef.current;
+
+      if (!element) {
+        return;
+      }
+
+      const actualMaximum = Math.max(
+        0,
+        element.scrollHeight -
+          element.clientHeight
+      );
+
+      const nextPosition = Math.min(
+        Math.max(0, position),
+        actualMaximum
+      );
+
+      element.scrollTop =
+        nextPosition;
+
+      setScrollTop(
+        nextPosition
+      );
+    },
+    []
+  );
+
+  /**
+   * Keyboard navigation.
+   *
+   * Handled keys:
+   * - ArrowDown
+   * - ArrowUp
+   * - PageDown
+   * - PageUp
+   * - Home
+   * - End
+   *
+   * Horizontal arrow keys retain
+   * their native browser behavior.
+   */
+  const handleKeyDown = useCallback(
+    (event) => {
+      if (
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey
+      ) {
+        return;
+      }
+
+      const element =
+        scrollContainerRef.current;
+
+      if (!element) {
+        return;
+      }
+
+      const currentPosition =
+        element.scrollTop;
+
+      const pageStep = Math.max(
+        safeRowHeight,
+        element.clientHeight -
+          safeRowHeight
+      );
+
+      let nextPosition = null;
+
+      switch (event.key) {
+        case "ArrowDown":
+          nextPosition =
+            currentPosition +
+            safeRowHeight;
+          break;
+
+        case "ArrowUp":
+          nextPosition =
+            currentPosition -
+            safeRowHeight;
+          break;
+
+        case "PageDown":
+          nextPosition =
+            currentPosition +
+            pageStep;
+          break;
+
+        case "PageUp":
+          nextPosition =
+            currentPosition -
+            pageStep;
+          break;
+
+        case "Home":
+          nextPosition = 0;
+          break;
+
+        case "End":
+          nextPosition =
+            element.scrollHeight -
+            element.clientHeight;
+          break;
+
+        default:
+          return;
+      }
+
+      event.preventDefault();
+
+      scrollToPosition(
+        nextPosition
+      );
+    },
+    [
+      safeRowHeight,
+      scrollToPosition,
+    ]
+  );
+
+  /**
+   * Reset scrolling after a change
+   * in searching, sorting or filtering.
+   *
+   * useLayoutEffect runs before the
+   * browser paints the updated view.
+   */
+  useLayoutEffect(() => {
     const element =
       scrollContainerRef.current;
 
@@ -144,14 +362,44 @@ export default function useVirtualLeaderboard({
   }, [resetKey]);
 
   /**
-   * Return a stable public interface
-   * for components.
+   * Correct the actual scroll position
+   * if the list becomes shorter.
+   *
+   * For example, after filtering from
+   * 508 rows down to 4 rows.
    */
+  useLayoutEffect(() => {
+    const element =
+      scrollContainerRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    if (
+      element.scrollTop >
+      maxScrollTop
+    ) {
+      element.scrollTop =
+        maxScrollTop;
+
+      setScrollTop(
+        maxScrollTop
+      );
+    }
+  }, [maxScrollTop]);
+
   return {
     scrollContainerRef,
+
     handleScroll,
+    handleKeyDown,
+    scrollToPosition,
 
     scrollTop: safeScrollTop,
+    viewportHeight:
+      effectiveViewportHeight,
+
     totalHeight,
 
     startIndex:

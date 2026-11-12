@@ -3,6 +3,7 @@ import React, {
   useDeferredValue,
   useMemo,
   useState,
+  useCallback,
 } from "react";
 
 import {
@@ -11,7 +12,6 @@ import {
 } from "../data/leaderboardData";
 
 import {
-  calculateTotalPoints,
   filterAndSortSquads,
   SORT_OPTIONS,
 } from "../utils/leaderboardUtils";
@@ -19,33 +19,22 @@ import {
 import useVirtualLeaderboard from
   "../hooks/useVirtualLeaderboard";
 
+import LeaderboardRow from "./LeaderboardRow";
 import KillFeedFilter from "./KillFeedFilter";
 
 import "./Leaderboard.css";
 
-/**
- * Virtualized PUBG leaderboard.
- *
- * Task 4:
- * - Squad searching
- * - Category filtering
- * - Sorting and direction control
- * - Fixed-height virtualization
- * - Kill-feed filtering
- */
-
 const ROW_HEIGHT = 60;
-
 const VIEWPORT_HEIGHT = 420;
-
 const OVERSCAN_ROWS = 5;
 
+/**
+ * Accessible, responsive and virtualized
+ * PUBG Vietnam leaderboard.
+ */
 export default function Leaderboard({
   squads = [],
 }) {
-  /**
-   * Filter controls.
-   */
   const [search, setSearch] =
     useState("");
 
@@ -55,36 +44,44 @@ export default function Leaderboard({
   const [sortBy, setSortBy] =
     useState("total");
 
-  const [sortDirection, setSortDirection] =
-    useState("desc");
+  const [
+    sortDirection,
+    setSortDirection,
+  ] = useState("desc");
 
   /**
-   * Defer large search calculations
-   * to keep input interaction responsive.
+   * React 19 deferred search value.
    */
   const deferredSearch =
     useDeferredValue(search);
 
   const isSearchPending =
-    deferredSearch !== search;
+    search !== deferredSearch;
 
   /**
-   * Extend the eight original squads
-   * with 500 generated mock squads.
-   *
-   * useMemo avoids recreating the
-   * generated dataset on every render.
+   * Generate 500 additional squads
+   * without regenerating them on each
+   * component render.
    */
+  const generatedSquads = useMemo(
+    () => generateMockSquads(500),
+    []
+  );
+
   const allSquads = useMemo(
     () => [
       ...squads,
-      ...generateMockSquads(500),
+      ...generatedSquads,
     ],
-    [squads]
+    [
+      squads,
+      generatedSquads,
+    ]
   );
 
   /**
-   * Filter and sort the complete dataset.
+   * Search, filter and sort only when
+   * relevant values change.
    */
   const rankedSquads = useMemo(
     () =>
@@ -106,10 +103,6 @@ export default function Leaderboard({
     ]
   );
 
-  /**
-   * Reset virtual scroll position
-   * when the leaderboard query changes.
-   */
   const resetKey = [
     deferredSearch,
     category,
@@ -118,11 +111,15 @@ export default function Leaderboard({
   ].join("|");
 
   /**
-   * Virtualization calculations.
+   * Virtualization hook.
+   *
+   * Actual viewport height is measured
+   * using ResizeObserver.
    */
   const {
     scrollContainerRef,
     handleScroll,
+    handleKeyDown,
     startIndex,
     endIndex,
     topPadding,
@@ -137,8 +134,7 @@ export default function Leaderboard({
   });
 
   /**
-   * Slice only the rows that should
-   * actually exist in the DOM.
+   * Only render the current virtual range.
    */
   const visibleSquads = useMemo(
     () =>
@@ -154,35 +150,78 @@ export default function Leaderboard({
   );
 
   /**
-   * Reset filters to the default view.
+   * Stable event handlers.
    */
-  const resetFilters = () => {
-    setSearch("");
-    setCategory("ALL");
-    setSortBy("total");
-    setSortDirection("desc");
-  };
+  const resetFilters = useCallback(
+    () => {
+      setSearch("");
+      setCategory("ALL");
+      setSortBy("total");
+      setSortDirection("desc");
+    },
+    []
+  );
 
-  /**
-   * Toggle ascending/descending order.
-   */
-  const toggleSortDirection = () => {
-    setSortDirection(
-      (previous) =>
-        previous === "desc"
-          ? "asc"
-          : "desc"
-    );
-  };
+  const toggleSortDirection =
+    useCallback(() => {
+      setSortDirection(
+        (previous) =>
+          previous === "desc"
+            ? "asc"
+            : "desc"
+      );
+    }, []);
 
-  const hasResults =
-    rankedSquads.length > 0;
+  const handleSearchChange =
+    useCallback((event) => {
+      setSearch(
+        event.target.value
+      );
+    }, []);
+
+  const handleCategoryChange =
+    useCallback((event) => {
+      setCategory(
+        event.target.value
+      );
+    }, []);
+
+  const handleSortChange =
+    useCallback((event) => {
+      setSortBy(
+        event.target.value
+      );
+    }, []);
 
   const activeSortLabel =
     SORT_OPTIONS.find(
       (option) =>
         option.value === sortBy
-    )?.label || "Total Points";
+    )?.label ?? "Total Points";
+
+  const hasResults =
+    rankedSquads.length > 0;
+
+  const isDefaultFilters =
+    search === "" &&
+    category === "ALL" &&
+    sortBy === "total" &&
+    sortDirection === "desc";
+
+  /**
+   * This description changes only
+   * when relevant query results change.
+   *
+   * It is announced separately from
+   * the visual result counters.
+   */
+  const resultAnnouncement =
+    `${rankedSquads.length} of ` +
+    `${allSquads.length} squads. ` +
+    `Sorted by ${activeSortLabel}, ` +
+    `${sortDirection === "desc"
+      ? "descending"
+      : "ascending"}.`;
 
   return (
     <>
@@ -202,9 +241,9 @@ export default function Leaderboard({
             </h2>
 
             <p>
-              Search, filter, and rank
-              squads using a virtualized
-              standings table.
+              Search, filter and rank
+              squads using virtualized
+              standings.
             </p>
           </div>
 
@@ -214,12 +253,13 @@ export default function Leaderboard({
         </div>
 
         <div className="leaderboard-card">
-          {/* FILTER CONTROLS */}
-          <div className="leaderboard-filters">
+          <div
+            className="leaderboard-filters"
+            role="group"
+            aria-label="Squad leaderboard filters"
+          >
             <div className="filter-field filter-search">
-              <label
-                htmlFor="squad-search"
-              >
+              <label htmlFor="squad-search">
                 SEARCH SQUADS
               </label>
 
@@ -228,29 +268,30 @@ export default function Leaderboard({
                 type="search"
                 placeholder="Search squad name..."
                 value={search}
-                onChange={(event) =>
-                  setSearch(
-                    event.target.value
-                  )
-                }
+                onChange={handleSearchChange}
+                aria-controls="squad-table-region"
+                aria-describedby="squad-search-help"
               />
+
+              <span
+                id="squad-search-help"
+                className="sr-only"
+              >
+                Search the leaderboard by
+                squad name.
+              </span>
             </div>
 
             <div className="filter-field">
-              <label
-                htmlFor="squad-category"
-              >
+              <label htmlFor="squad-category">
                 CATEGORY
               </label>
 
               <select
                 id="squad-category"
                 value={category}
-                onChange={(event) =>
-                  setCategory(
-                    event.target.value
-                  )
-                }
+                onChange={handleCategoryChange}
+                aria-controls="squad-table-region"
               >
                 <option value="ALL">
                   All Categories
@@ -271,20 +312,15 @@ export default function Leaderboard({
             </div>
 
             <div className="filter-field">
-              <label
-                htmlFor="squad-sort"
-              >
+              <label htmlFor="squad-sort">
                 SORT BY
               </label>
 
               <select
                 id="squad-sort"
                 value={sortBy}
-                onChange={(event) =>
-                  setSortBy(
-                    event.target.value
-                  )
-                }
+                onChange={handleSortChange}
+                aria-controls="squad-table-region"
               >
                 {SORT_OPTIONS.map(
                   (option) => (
@@ -300,23 +336,20 @@ export default function Leaderboard({
             </div>
 
             <div className="filter-field">
-              <label>
+              <span
+                id="sort-direction-label"
+                className="control-label"
+              >
                 DIRECTION
-              </label>
+              </span>
 
               <button
                 type="button"
                 className="sort-direction-button"
-                onClick={
-                  toggleSortDirection
-                }
-                aria-label={
-                  `Sort ${
-                    sortDirection === "desc"
-                      ? "descending"
-                      : "ascending"
-                  }. Click to reverse.`
-                }
+                onClick={toggleSortDirection}
+                aria-labelledby="sort-direction-label"
+                aria-describedby="sort-direction-value"
+                aria-controls="squad-table-region"
               >
                 <span aria-hidden="true">
                   {sortDirection === "desc"
@@ -324,9 +357,11 @@ export default function Leaderboard({
                     : "↑"}
                 </span>
 
-                {sortDirection === "desc"
-                  ? "Descending"
-                  : "Ascending"}
+                <span id="sort-direction-value">
+                  {sortDirection === "desc"
+                    ? "Descending"
+                    : "Ascending"}
+                </span>
               </button>
             </div>
 
@@ -334,28 +369,28 @@ export default function Leaderboard({
               type="button"
               className="filter-reset-button"
               onClick={resetFilters}
-              disabled={
-                search === "" &&
-                category === "ALL" &&
-                sortBy === "total" &&
-                sortDirection === "desc"
-              }
+              disabled={isDefaultFilters}
             >
               RESET
             </button>
           </div>
 
-          {/* SUMMARY */}
           <div className="leaderboard-toolbar">
             <div className="toolbar-title">
-              <span className="status-dot"></span>
+              <span
+                className="status-dot"
+                aria-hidden="true"
+              />
 
               <strong>
                 Squad Standings
               </strong>
             </div>
 
-            <div className="leaderboard-counts">
+            <div
+              className="leaderboard-counts"
+              aria-hidden="true"
+            >
               <span>
                 {rankedSquads.length} of{" "}
                 {allSquads.length} squads
@@ -373,21 +408,42 @@ export default function Leaderboard({
             </div>
           </div>
 
-          {/* VIRTUALIZED TABLE */}
+          <div
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {!isSearchPending &&
+              resultAnnouncement}
+          </div>
+
+          <p
+            className="table-keyboard-hint"
+            id="table-keyboard-help"
+          >
+            Focus the table to scroll with
+            Arrow keys, Page Up/Down,
+            Home or End.
+          </p>
+
           {hasResults ? (
             <div
+              id="squad-table-region"
               ref={scrollContainerRef}
               className="virtual-table-scroll"
               onScroll={handleScroll}
-              style={{
-                height: VIEWPORT_HEIGHT,
-              }}
+              onKeyDown={handleKeyDown}
               tabIndex={0}
               role="region"
               aria-label="Scrollable PUBG squad standings"
+              aria-describedby="table-keyboard-help"
             >
               <table
                 className="leaderboard-table virtual-leaderboard-table"
+                aria-rowcount={
+                  rankedSquads.length + 1
+                }
               >
                 <colgroup>
                   <col className="rank-column" />
@@ -400,7 +456,7 @@ export default function Leaderboard({
                 </colgroup>
 
                 <thead>
-                  <tr>
+                  <tr aria-rowindex={1}>
                     <th scope="col">
                       RANK
                     </th>
@@ -436,6 +492,7 @@ export default function Leaderboard({
                     <tr
                       className="virtual-spacer-row"
                       aria-hidden="true"
+                      role="presentation"
                     >
                       <td
                         colSpan={7}
@@ -453,61 +510,14 @@ export default function Leaderboard({
                         index +
                         1;
 
-                      const totalPoints =
-                        calculateTotalPoints(
-                          squad
-                        );
-
                       return (
-                        <tr
-                          className="virtual-row"
+                        <LeaderboardRow
                           key={
                             `${squad.squadName}-${squad.ts}`
                           }
-                          aria-rowindex={rank + 1}
-                        >
-                          <td>
-                            <span
-                              className={
-                                rank <= 3
-                                  ? "rank-badge top-rank"
-                                  : "rank-badge"
-                              }
-                            >
-                              #{rank}
-                            </span>
-                          </td>
-
-                          <th scope="row">
-                            <span className="squad-name">
-                              {squad.squadName}
-                            </span>
-                          </th>
-
-                          <td>
-                            <span className="category-badge">
-                              {squad.category}
-                            </span>
-                          </td>
-
-                          <td>
-                            {squad.wwcdCount}
-                          </td>
-
-                          <td>
-                            {squad.placementPts}
-                          </td>
-
-                          <td>
-                            {squad.killPts}
-                          </td>
-
-                          <td>
-                            <strong className="total-points">
-                              {totalPoints}
-                            </strong>
-                          </td>
-                        </tr>
+                          squad={squad}
+                          rank={rank}
+                        />
                       );
                     }
                   )}
@@ -516,6 +526,7 @@ export default function Leaderboard({
                     <tr
                       className="virtual-spacer-row"
                       aria-hidden="true"
+                      role="presentation"
                     >
                       <td
                         colSpan={7}
@@ -529,7 +540,10 @@ export default function Leaderboard({
               </table>
             </div>
           ) : (
-            <div className="empty-results">
+            <div
+              id="squad-table-region"
+              className="empty-results"
+            >
               <strong>
                 No matching squads
               </strong>
@@ -549,7 +563,6 @@ export default function Leaderboard({
             </div>
           )}
 
-          {/* FOOTER */}
           <div className="leaderboard-footer">
             <span>
               Sorted by {activeSortLabel}
