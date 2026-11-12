@@ -1,25 +1,10 @@
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
+import { useCallback, useEffect, useRef, useState } from "react";
 import DrumPad from "./DrumPad.jsx";
 import HitHistory from "./HitHistory.jsx";
 import SoundLevelMeter from "./SoundLevelMeter.jsx";
-
-import {
-  DRUMS,
-  PAD_BY_CODE,
-} from "../data/drums.js";
-
-import {
-  closeDrumAudio,
-  playDrum,
-} from "../audio/drumAudio.js";
-
+import { DRUMS, PAD_BY_CODE } from "../data/drums.js";
+import { closeDrumAudio, playDrum } from "../audio/drumAudio.js";
 import { useDrumKeyboard } from "../hooks/useDrumKeyboard.js";
 
 const MAX_HITS = 12;
@@ -28,11 +13,10 @@ export default function DrumKit() {
   const [activePadId, setActivePadId] = useState(null);
   const [hits, setHits] = useState([]);
   const [hitCount, setHitCount] = useState(0);
-
   const [announcement, setAnnouncement] = useState(
     "Ready. Play a drum to begin."
   );
-
+  const [lastPlayed, setLastPlayed] = useState(null);
   const [audioError, setAudioError] = useState("");
 
   const nextHitId = useRef(0);
@@ -40,15 +24,11 @@ export default function DrumKit() {
   const mounted = useRef(true);
 
   const triggerPad = useCallback(async (padId) => {
-    const drum = DRUMS.find(
-      (item) => item.id === padId
-    );
-
+    const drum = DRUMS.find((item) => item.id === padId);
     if (!drum) return;
 
     try {
       await playDrum(padId);
-
       if (!mounted.current) return;
 
       nextHitId.current += 1;
@@ -71,11 +51,8 @@ export default function DrumKit() {
       ].slice(0, MAX_HITS));
 
       setHitCount((previous) => previous + 1);
-
-      setAnnouncement(
-        `Hit ${count}: ${drum.name}.`
-      );
-
+      setLastPlayed(drum);
+      setAnnouncement(`Hit ${count}: ${drum.name}.`);
       setAudioError("");
       setActivePadId(padId);
 
@@ -98,11 +75,7 @@ export default function DrumKit() {
     }
   }, []);
 
-  useDrumKeyboard(
-    PAD_BY_CODE,
-    triggerPad,
-    true
-  );
+  useDrumKeyboard(PAD_BY_CODE, triggerPad, true);
 
   useEffect(() => {
     mounted.current = true;
@@ -125,17 +98,12 @@ export default function DrumKit() {
     >
       <div className="studio__header">
         <div>
-          <p className="eyebrow">
-            Production studio
-          </p>
-
-          <h2 id="studio-title">
-            Drum pads
-          </h2>
+          <p className="eyebrow">Production studio</p>
+          <h2 id="studio-title">Drum pads</h2>
         </div>
 
         <span className="studio__tag">
-          Accessible feedback · Task 4
+          Accessible drum studio
         </span>
       </div>
 
@@ -143,9 +111,8 @@ export default function DrumKit() {
         className="studio__instructions"
         id="drum-instructions"
       >
-        Click a pad, use Enter or Space on a
-        focused pad, or press physical
-        W, A, S, D, J, K, L.
+        Click a pad, use Enter or Space on a focused pad,
+        or press physical W, A, S, D, J, K, L.
         Shortcuts are disabled while typing.
       </p>
 
@@ -164,6 +131,15 @@ export default function DrumKit() {
           />
         ))}
       </div>
+
+      <p
+        className="studio__last-played"
+        aria-hidden="true"
+      >
+        {lastPlayed
+          ? `Last played: ${lastPlayed.name} (${lastPlayed.key})`
+          : "Last played: none yet"}
+      </p>
 
       <div
         className="sr-only"
@@ -184,10 +160,7 @@ export default function DrumKit() {
       </div>
 
       {audioError && (
-        <p
-          className="studio__error"
-          role="alert"
-        >
+        <p className="studio__error" role="alert">
           {audioError}
         </p>
       )}

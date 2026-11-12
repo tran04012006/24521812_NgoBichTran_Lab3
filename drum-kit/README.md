@@ -1,31 +1,65 @@
 
 # Production Studio Drum Kit — React 19
 
-Accessible, responsive, browser-synthesized drum kit,
-extended through Task 5.
+Accessible browser-based drum kit. Includes seven synthesized
+sounds, physical keyboard shortcuts, recent-hit history,
+screen-reader announcements and a digital dBFS sound-level meter.
 
-## Requirements
+## Prerequisites
 
-- Node.js 20.19+ or 22.12+
-  (or newer compatible release)
+- Node.js 20.19+ or 22.12+ (or a newer compatible version)
 - npm
-- Browser supporting Web Audio API
-  for manual playback tests
+- Modern browser with Web Audio API
 
-## Setup and commands
+## Quick Start
 
 ```bash
 npm install
 npm run dev
-npm run test:run
-npm run build
 ```
 
-For test watch mode: `npm test`.
+Open the URL shown by Vite, normally http://localhost:5173.
+
+## Final Quality Gate
+
+```bash
+npm run verify
+```
+
+The verify command runs all Vitest tests using npm run test:run,
+then builds the production application using npm run build.
+
+Both commands require installed dependencies.
+
+Manual audio and accessibility checks are separate.
+
+For interactive test watching:
+
+```bash
+npm test
+```
+
+## Lighthouse Accessibility Audit
+
+```bash
+npm run build
+npm run preview
+```
+
+Open the preview site in Chrome:
+
+1. Open DevTools.
+2. Select Lighthouse.
+3. Select Accessibility.
+4. Generate a report.
+5. Record the score and any findings in docs/ACCESSIBILITY_AUDIT.md.
+
+The goal is Lighthouse Accessibility 100 plus relevant WCAG 2.2 AA
+manual checks. Neither is claimed without testing evidence.
 
 ## Controls
 
-| Physical key | Drum |
+| Physical keyboard key | Drum |
 | --- | --- |
 | W | Kick |
 | A | Snare |
@@ -35,78 +69,104 @@ For test watch mode: `npm test`.
 | K | Clap |
 | L | Crash |
 
-Click or tap a drum pad to play it.
+Click or tap a pad to play it.
 
-Native buttons also support Tab, Enter and Space.
+Alternatively, focus a drum pad using Tab and activate it with
+Enter or Space.
 
-The physical shortcuts are ignored for:
-- Repeated keydown events.
-- Ctrl/Alt/Meta combinations.
-- Editable fields.
+Shortcut handling uses event.code and:
 
-## Accessible feedback
+- Ignores repeated keydown events.
+- Ignores Ctrl, Alt and Meta combinations.
+- Ignores editable fields.
+- Respects prevented events.
+- Ignores keyboard events during IME composition.
+- Removes event listeners during cleanup.
 
-- Brief pad visual activation.
-- Keyboard focus ring.
+## Accessible Feedback
+
+- Temporary visible pad activation.
+- Persistent Last played label.
+- Screen-reader aria-live announcement.
+- Recent-hit history capped at 12 successful hits.
+- Clear history button.
+- RMS digital audio output meter in dBFS.
+- Visible keyboard focus indicators.
+- Forced-colors focus cues.
 - Reduced-motion support.
-- The 12 latest successful drum hits.
-- A separate polite screen-reader announcement.
-- A Web Audio AnalyserNode RMS digital level meter.
-- Keyboard-accessible Clear history control.
 
-Levels are dBFS, not calibrated acoustic dB SPL.
+The meter is not a calibrated acoustic sound-pressure meter.
 
-## Task 5 automated tests
+## Project Structure
 
-### Keyboard tests
+- src/audio/drumAudio.js:
+  Synthesized sounds and audio analyser.
 
-File:
-`src/hooks/__tests__/useDrumKeyboard.test.jsx`
+- src/hooks/useDrumKeyboard.js:
+  Guarded physical keyboard shortcuts.
 
-Tests:
-- Physical keyboard code mapping.
-- Repeated-key prevention.
-- Keyboard modifiers.
-- Editable-field isolation.
-- Event listener lifecycle.
+- src/components/:
+  Reusable drum pads and visual feedback.
 
-### Component tests
+- src/**/__tests__/:
+  Vitest component and hook tests.
 
-File:
-`src/components/__tests__/DrumKit.test.jsx`
+- docs/ACCESSIBILITY_AUDIT.md:
+  Accessibility verification template.
 
-Tests:
-- Pad rendering.
-- Click and focused-key activation.
-- Hit history cap and order.
-- Clearing the history.
-- Audio errors.
-- Accessible digital meter.
+- docs/SUBMISSION_CHECKLIST.md:
+  Submission materials and final checks.
 
-Vitest uses jsdom and mocks the browser audio
-implementation.
+- task_decomposition.md:
+  Planning and Git commit roadmap.
 
-Passing tests does not establish that real audio
-sounds correct or that WCAG 2.2 AA is fully satisfied.
+## Project Workflow
 
-## Manual responsive and accessibility checks
+Six tasks with two planned commits per task, 12 in total.
 
-1. View at 320, 375, 768 and 1280 CSS pixels.
-2. Check for horizontal page overflow.
-3. Test desktop at 200% browser zoom.
-4. Verify focus rings on buttons.
-5. Check contrast and high-contrast mode.
-6. Inspect with NVDA or VoiceOver.
-7. Verify all seven sounds with speakers.
-8. Check that the sound meter responds.
-9. Test prefers-reduced-motion.
+The downloaded project includes source files, not your local
+Git history.
 
-## Remaining work
+### Commit 11
 
-Task 6:
-- Lighthouse and WCAG audit.
-- Cross-browser smoke tests.
-- Final documentation.
-- Git commits 11 and 12.
+```bash
+git add src/components/DrumKit.jsx src/hooks/useDrumKeyboard.js src/index.css src/components/__tests__/DrumKit.test.jsx src/hooks/__tests__/useDrumKeyboard.test.jsx
 
-Refer to task_decomposition.md for the project plan.
+git commit -m "fix: strengthen keyboard accessibility and visible hit feedback"
+```
+
+### Commit 12
+
+After local verification and recording audit evidence:
+
+```bash
+git add package.json README.md task_decomposition.md docs/
+
+git commit -m "docs: finalize accessibility audit and submission workflow"
+```
+
+Review staged changes before committing:
+
+```bash
+git diff --cached
+```
+
+If verification reveals defects, fix them and create additional
+meaningful commits.
+
+## Final Submission
+
+Run:
+
+```bash
+npm install
+npm ls react react-dom
+npm run verify
+npm run preview
+```
+
+Perform the manual accessibility checks and complete the audit
+and submission checklist documents.
+
+A Lighthouse Accessibility score of 100 does not by itself
+establish full WCAG 2.2 AA conformance.
