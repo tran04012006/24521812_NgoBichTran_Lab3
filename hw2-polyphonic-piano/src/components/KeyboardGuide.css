@@ -1,0 +1,166 @@
+
+.keyboard-guide {
+  margin-bottom: 24px;
+  padding: 20px;
+
+  border: 1px solid #334155;
+  border-radius: 12px;
+
+  background: #0e1626;
+}
+
+.keyboard-guide__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.keyboard-guide__header h3 {
+  margin-bottom: 8px;
+
+  color: #f8fafc;
+  font-size: 18px;
+}
+
+.keyboard-guide__header p {
+  margin: 0;
+
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.keyboard-guide__range {
+  flex-shrink: 0;
+
+  padding: 7px 12px;
+
+  border: 1px solid #475569;
+  border-radius: 20px;
+
+  color: #93c5fd;
+  background: #1e293b;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.keyboard-guide__keys {
+  display: grid;
+  grid-template-columns: repeat(
+    9,
+    minmax(0, 1fr)
+  );
+
+  gap: 8px;
+}
+
+.keyboard-guide__key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 0;
+  padding: 12px 4px;
+
+  border: 1px solid #475569;
+  border-radius: 8px;
+
+  background: #1e293b;
+
+  transition:
+    background-color 100ms ease,
+    border-color 100ms ease,
+    transform 100ms ease;
+}
+
+.keyboard-guide__key kbd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  border: 1px solid #64748b;
+  border-radius: 6px;
+
+  background: #334155;
+  color: #f8fafc;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.keyboard-guide__key span {
+  color: #cbd5e1;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.keyboard-guide__key--active {
+  border-color: #2dd4bf;
+  background: #134e4a;
+
+  transform: translateY(2px);
+}
+
+.keyboard-guide__key--active kbd {
+  border-color: #5eead4;
+  background: #0d9488;
+  color: #ffffff;
+}
+
+.keyboard-guide__key--active span {
+  color: #99f6e4;
+}
+
+.keyboard-guide__hint {
+  margin: 16px 0 0;
+
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .keyboard-guide__keys {
+    grid-template-columns: repeat(
+      6,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 600px) {
+  .keyboard-guide {
+    padding: 14px;
+  }
+
+  .keyboard-guide__header {
+    flex-direction: column;
+  }
+
+  .keyboard-guide__keys {
+    grid-template-columns: repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  }
+
+  .keyboard-guide__key {
+    padding: 10px 4px;
+  }
+
+  .keyboard-guide__key kbd {
+    width: 30px;
+    height: 30px;
+  }
+}

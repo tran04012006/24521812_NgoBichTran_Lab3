@@ -92,3 +92,64 @@ Task 2
 │   ├── 7.5 Verify simultaneous playback
 │   ├── 7.6 Verify FIFO voice stealing
 │   └── 7.7 Verify voice count never exceeds 8
+Task 3
+│
+├── 1. Physical Keyboard Mapping
+│   ├── 1.1 Create keyboardMapping.js
+│   ├── 1.2 Define physical key-to-MIDI mapping
+│   ├── 1.3 Map 17 keys from C4 to E5
+│   ├── 1.4 Use KeyboardEvent.code
+│   └── 1.5 Export mapping for reuse
+│
+├── 2. Keyboard Event Handling
+│   ├── 2.1 Register keydown listener
+│   ├── 2.2 Register keyup listener
+│   ├── 2.3 Prevent auto-repeat
+│   ├── 2.4 Ignore typing in form controls
+│   ├── 2.5 Ignore modified shortcuts
+│   ├── 2.6 Handle window blur
+│   └── 2.7 Remove listeners on unmount
+│
+├── 3. Pointer Event Handling
+│   ├── 3.1 Handle pointerdown
+│   ├── 3.2 Handle pointerup
+│   ├── 3.3 Handle pointercancel
+│   ├── 3.4 Handle lostpointercapture
+│   ├── 3.5 Support independent pointer IDs
+│   └── 3.6 Release notes safely
+│
+├── 4. Input Ownership
+│   ├── 4.1 Track note owners using Map and Set
+│   ├── 4.2 Identify computer keyboard input sources
+│   ├── 4.3 Identify mouse and touch input sources
+│   ├── 4.4 Support multiple owners per MIDI note
+│   ├── 4.5 Start audio only for the first owner
+│   ├── 4.6 Stop audio when the last owner releases
+│   ├── 4.7 Handle notes removed by FIFO stealing
+│   └── 4.8 Clear owners on Stop All
+│
+├── 5. React Integration
+│   ├── 5.1 Update Piano.jsx
+│   ├── 5.2 Update PianoKey.jsx
+│   ├── 5.3 Preserve PolyphonicSynth instance
+│   ├── 5.4 Keep event callbacks stable
+│   ├── 5.5 Synchronize active note state
+│   └── 5.6 Preserve React.memo optimization
+│
+├── 6. Keyboard Guide UI
+│   ├── 6.1 Create KeyboardGuide.jsx
+│   ├── 6.2 Create KeyboardGuide.css
+│   ├── 6.3 Display physical key labels
+│   ├── 6.4 Display corresponding piano notes
+│   └── 6.5 Highlight currently active notes
+│
+├── 7. Verification
+│   ├── 7.1 Test computer keyboard input
+│   ├── 7.2 Test simultaneous keyboard notes
+│   ├── 7.3 Test keyboard auto-repeat prevention
+│   ├── 7.4 Test keyboard and mouse on same note
+│   ├── 7.5 Test multiple touch inputs
+│   ├── 7.6 Test window focus loss
+│   ├── 7.7 Test FIFO voice stealing
+│   ├── 7.8 Test Stop All
+│   └── 7.9 Verify production build
