@@ -1,10 +1,57 @@
 
-import { useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import DrumPad from "./DrumPad.jsx";
-import { DRUMS } from "../data/drums.js";
+
+import {
+  DRUMS,
+  PAD_BY_CODE,
+} from "../data/drums.js";
+
+import {
+  closeDrumAudio,
+  playDrum,
+} from "../audio/drumAudio.js";
+
+import { useDrumKeyboard } from "../hooks/useDrumKeyboard.js";
 
 export default function DrumKit() {
-  const [selectedPadId, setSelectedPadId] = useState(null);
+  const [selectedPadId, setSelectedPadId] =
+    useState(null);
+
+  const [audioError, setAudioError] =
+    useState("");
+
+  const triggerPad = useCallback(async (padId) => {
+    try {
+      await playDrum(padId);
+
+      setSelectedPadId(padId);
+      setAudioError("");
+    } catch (error) {
+      setAudioError(
+        error instanceof Error
+          ? error.message
+          : "Unable to play sound."
+      );
+    }
+  }, []);
+
+  useDrumKeyboard(
+    PAD_BY_CODE,
+    triggerPad,
+    true
+  );
+
+  useEffect(() => {
+    return () => {
+      void closeDrumAudio();
+    };
+  }, []);
 
   const selectedDrum = DRUMS.find(
     (drum) => drum.id === selectedPadId
@@ -27,26 +74,33 @@ export default function DrumKit() {
         </div>
 
         <span className="studio__tag">
-          UI preview · Task 2
+          Playable · Task 3
         </span>
       </div>
 
-      <p className="studio__instructions">
-        Click or focus a pad and press Enter or
-        Space to select it. Audio and global
-        W/A/S/D/J/K/L shortcuts arrive in Task 3.
+      <p
+        className="studio__instructions"
+        id="drum-instructions"
+      >
+        Click a pad, focus it and press Enter/Space,
+        or use the physical W, A, S, D, J, K, L
+        keys. Shortcuts are ignored while typing.
       </p>
 
       <div
         className="drum-grid"
+        role="group"
         aria-label="Drum pads"
+        aria-describedby="drum-instructions"
       >
         {DRUMS.map((drum) => (
           <DrumPad
             key={drum.id}
             drum={drum}
-            isSelected={selectedPadId === drum.id}
-            onSelect={setSelectedPadId}
+            isSelected={
+              selectedPadId === drum.id
+            }
+            onSelect={triggerPad}
           />
         ))}
       </div>
@@ -54,11 +108,21 @@ export default function DrumKit() {
       <div
         className="studio__selection"
         role="status"
+        aria-live="polite"
       >
         {selectedDrum
-          ? `Selected pad: ${selectedDrum.name} (${selectedDrum.key})`
-          : "No pad selected yet."}
+          ? `Last played: ${selectedDrum.name} (${selectedDrum.key})`
+          : "Ready. Play a drum to begin."}
       </div>
+
+      {audioError && (
+        <p
+          className="studio__error"
+          role="alert"
+        >
+          {audioError}
+        </p>
+      )}
     </section>
   );
 }

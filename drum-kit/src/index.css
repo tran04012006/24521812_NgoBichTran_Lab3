@@ -85,7 +85,10 @@ h2 {
 
 .drum-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(
+    4,
+    minmax(0, 1fr)
+  );
   gap: 0.9rem;
   margin: 1.5rem 0;
 }
@@ -106,7 +109,6 @@ h2 {
   border: 2px solid #475569;
   border-radius: 1rem;
   cursor: pointer;
-
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
@@ -184,9 +186,26 @@ h2 {
   color: #e2e8f0;
 }
 
+/* Task 3: Audio error feedback */
+
+.studio__error {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #fda4af;
+  border-radius: 0.75rem;
+  background: #451a26;
+  color: #ffe4e6;
+  line-height: 1.5;
+}
+
+/* Responsive layout */
+
 @media (max-width: 760px) {
   .drum-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
   }
 }
 
@@ -196,7 +215,10 @@ h2 {
   }
 
   .drum-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
     gap: 0.65rem;
   }
 

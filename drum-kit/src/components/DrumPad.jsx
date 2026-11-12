@@ -11,20 +11,31 @@ export default function DrumPad({
         (isSelected ? " is-selected" : "")
       }
       type="button"
-      aria-label={`${drum.name} drum pad, key ${drum.key}`}
+      aria-label={
+        `${drum.name} drum pad, physical key ${drum.key}`
+      }
       aria-pressed={isSelected}
       onClick={() => onSelect(drum.id)}
     >
-      <span className="drum-pad__key" aria-hidden="true">
+      <span
+        className="drum-pad__key"
+        aria-hidden="true"
+      >
         {drum.key}
       </span>
 
-      <span className="drum-pad__name" aria-hidden="true">
+      <span
+        className="drum-pad__name"
+        aria-hidden="true"
+      >
         {drum.name}
       </span>
 
-      <span className="drum-pad__hint" aria-hidden="true">
-        {isSelected ? "Selected" : "Select pad"}
+      <span
+        className="drum-pad__hint"
+        aria-hidden="true"
+      >
+        {isSelected ? "Last played" : "Play drum"}
       </span>
     </button>
   );

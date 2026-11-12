@@ -9,16 +9,13 @@ export default function App() {
           Homework 1 · React 19
         </p>
 
-        <h1>
-          Production Studio Drum Kit
-        </h1>
+        <h1>Production Studio Drum Kit</h1>
 
         <p className="description">
-          A responsive, accessible drum-pad interface.
-          Select pads by mouse, touch, or standard
-          button keyboard controls. Audio playback
-          and dedicated drum shortcuts will be
-          added in Task 3.
+          Play seven synthesized drum sounds by
+          clicking a pad or using physical keyboard
+          shortcuts. Hit history and the sound-level
+          meter follow in Task 4.
         </p>
       </header>
 
