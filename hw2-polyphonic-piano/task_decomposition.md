@@ -153,3 +153,80 @@ Task 3
 │   ├── 7.7 Test FIFO voice stealing
 │   ├── 7.8 Test Stop All
 │   └── 7.9 Verify production build
+Task 4
+│
+├── 1. Recording Data Model
+│   ├── 1.1 Define recording event structure
+│   │   ├── midi
+│   │   ├── freqHz
+│   │   ├── durationMs
+│   │   └── deltaMs
+│   ├── 1.2 Track note start timestamps
+│   ├── 1.3 Track note end timestamps
+│   ├── 1.4 Calculate note durations
+│   └── 1.5 Calculate delta times
+│
+├── 2. Sequencer Class
+│   ├── 2.1 Create src/sequencer/Sequencer.js
+│   ├── 2.2 Implement startRecording()
+│   ├── 2.3 Implement recordNoteOn()
+│   ├── 2.4 Implement recordNoteOff()
+│   ├── 2.5 Implement stopRecording()
+│   ├── 2.6 Store recorded events
+│   └── 2.7 Export recorded events
+│
+├── 3. FIFO Playback
+│   ├── 3.1 Read recorded events in order
+│   ├── 3.2 Reconstruct relative start times
+│   ├── 3.3 Schedule asynchronous note starts
+│   ├── 3.4 Schedule independent note releases
+│   ├── 3.5 Preserve overlapping notes
+│   ├── 3.6 Support repeated MIDI notes
+│   └── 3.7 Finish playback after final release
+│
+├── 4. Playback Speed
+│   ├── 4.1 Support 0.5x speed
+│   ├── 4.2 Support 1x speed
+│   ├── 4.3 Support 2x speed
+│   ├── 4.4 Scale delta times
+│   └── 4.5 Scale note durations
+│
+├── 5. Playback Cancellation
+│   ├── 5.1 Track playback AbortController
+│   ├── 5.2 Cancel pending note starts
+│   ├── 5.3 Cancel pending note releases
+│   ├── 5.4 Release playback-owned notes
+│   └── 5.5 Prevent canceled notes from restarting
+│
+├── 6. React Integration
+│   ├── 6.1 Update Piano.jsx
+│   ├── 6.2 Initialize Sequencer
+│   ├── 6.3 Connect recording to note ownership
+│   ├── 6.4 Connect playback to PolyphonicSynth
+│   ├── 6.5 Preserve manual input ownership
+│   ├── 6.6 Implement recording state
+│   ├── 6.7 Implement playback state
+│   └── 6.8 Clean up on component unmount
+│
+├── 7. User Interface
+│   ├── 7.1 Create RecorderControls.jsx
+│   ├── 7.2 Create RecorderControls.css
+│   ├── 7.3 Add Start Recording button
+│   ├── 7.4 Add Stop Recording button
+│   ├── 7.5 Add Play button
+│   ├── 7.6 Add Stop Playback button
+│   ├── 7.7 Add playback speed selector
+│   ├── 7.8 Display recorded events
+│   └── 7.9 Display current sequencer status
+│
+├── 8. Testing
+│   ├── 8.1 Test recording a single note
+│   ├── 8.2 Test recording a melody
+│   ├── 8.3 Test recording a chord
+│   ├── 8.4 Test FIFO order
+│   ├── 8.5 Test playback at 0.5x
+│   ├── 8.6 Test playback at 1x
+│   ├── 8.7 Test playback at 2x
+│   ├── 8.8 Test Stop Playback
+│   ├── 8.9 Test concurrent manual input
+│   └── 8.10 Verify production build
