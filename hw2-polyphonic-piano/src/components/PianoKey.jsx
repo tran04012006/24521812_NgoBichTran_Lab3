@@ -36,31 +36,92 @@ const PianoKey = memo(function PianoKey({
     : undefined;
 
   const handlePointerDown = (event) => {
-    if (event.pointerType === "mouse" && event.button !== 0) {
+    // Only the primary mouse button should start notes.
+    // All touch pointers are allowed.
+    if (
+      event.pointerType === "mouse" &&
+      event.button !== 0
+    ) {
       return;
     }
 
-    // Keep receiving pointer events while the key is held.
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const sourceId = `pointer:${event.pointerId}`;
+
+    event.currentTarget.setPointerCapture(
+      event.pointerId
+    );
 
     onSelect(midi);
-    onNoteOn(midi, frequency);
+    onNoteOn(midi, frequency, sourceId);
   };
 
   const handlePointerUp = (event) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    const sourceId = `pointer:${event.pointerId}`;
+
+    onNoteOff(midi, sourceId);
+
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    }
+  };
+
+  const handlePointerCancel = (event) => {
+    const sourceId = `pointer:${event.pointerId}`;
+
+    onNoteOff(midi, sourceId);
+  };
+
+  const handleLostPointerCapture = (event) => {
+    const sourceId = `pointer:${event.pointerId}`;
+
+    // Safe even when pointerup already released it.
+    onNoteOff(midi, sourceId);
+  };
+
+  const handleKeyDown = (event) => {
+    if (
+      event.code !== "Space" &&
+      event.code !== "Enter"
+    ) {
+      return;
     }
 
-    onNoteOff(midi);
+    if (event.repeat) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+
+    const sourceId = `button:${midi}`;
+
+    onSelect(midi);
+    onNoteOn(midi, frequency, sourceId);
   };
 
-  const handlePointerCancel = () => {
-    onNoteOff(midi);
+  const handleKeyUp = (event) => {
+    if (
+      event.code !== "Space" &&
+      event.code !== "Enter"
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    onNoteOff(midi, `button:${midi}`);
   };
 
-  const handleLostPointerCapture = () => {
-    onNoteOff(midi);
+  const handleBlur = () => {
+    // Avoid stuck notes if focus moves away
+    // before keyup occurs.
+    onNoteOff(midi, `button:${midi}`);
   };
 
   return (
@@ -75,6 +136,9 @@ const PianoKey = memo(function PianoKey({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
       onLostPointerCapture={handleLostPointerCapture}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+      onBlur={handleBlur}
       onClick={() => onSelect(midi)}
     >
       <span className="piano-key__label">
