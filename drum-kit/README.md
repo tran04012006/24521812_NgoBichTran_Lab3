@@ -1,73 +1,112 @@
 
-# Production Studio Drum Kit
+# Production Studio Drum Kit — React 19
 
-React 19 + Vite homework project.
-Task 4 builds on the playable Task 3 drum kit.
+Accessible, responsive, browser-synthesized drum kit,
+extended through Task 5.
 
-## Run
+## Requirements
 
-Requires Node.js 20.19+ or 22.12+ and npm.
+- Node.js 20.19+ or 22.12+
+  (or newer compatible release)
+- npm
+- Browser supporting Web Audio API
+  for manual playback tests
+
+## Setup and commands
 
 ```bash
 npm install
 npm run dev
-```
-
-## Production Build
-
-```bash
+npm run test:run
 npm run build
-npm run preview
 ```
+
+For test watch mode: `npm test`.
 
 ## Controls
 
-| Key | Drum |
-|---|---|
+| Physical key | Drum |
+| --- | --- |
 | W | Kick |
 | A | Snare |
-| S | Hi-Hat |
-| D | Open Hat |
+| S | Closed Hi-Hat |
+| D | Open Hi-Hat |
 | J | Tom |
 | K | Clap |
 | L | Crash |
 
-Use mouse or touch to activate pads.
-Use Tab and Enter/Space on focused buttons.
+Click or tap a drum pad to play it.
 
-Global shortcuts ignore:
-- Held-key repeats.
+Native buttons also support Tab, Enter and Space.
+
+The physical shortcuts are ignored for:
+- Repeated keydown events.
 - Ctrl/Alt/Meta combinations.
-- Typing fields.
+- Editable fields.
 
-## Task 4 Accessibility Features
+## Accessible feedback
 
-- Accessible buttons and visible keyboard focus.
-- Temporary activation feedback.
-- Screen-reader hit announcements.
-- Recent-hit history (maximum 12).
-- Clear-history button.
-- Live Web Audio AnalyserNode meter.
-- Digital RMS sound-level readings in dBFS.
-- Responsive layout.
+- Brief pad visual activation.
+- Keyboard focus ring.
+- Reduced-motion support.
+- The 12 latest successful drum hits.
+- A separate polite screen-reader announcement.
+- A Web Audio AnalyserNode RMS digital level meter.
+- Keyboard-accessible Clear history control.
 
-The digital audio meter is not a calibrated
-acoustic sound-pressure meter.
+Levels are dBFS, not calibrated acoustic dB SPL.
 
-## Verification
+## Task 5 automated tests
 
-Manual testing with NVDA/VoiceOver is required.
+### Keyboard tests
 
-WCAG 2.2 AA and Lighthouse Accessibility 100
-are targets, not yet verified.
+File:
+`src/hooks/__tests__/useDrumKeyboard.test.jsx`
 
-## Project Roadmap
+Tests:
+- Physical keyboard code mapping.
+- Repeated-key prevention.
+- Keyboard modifiers.
+- Editable-field isolation.
+- Event listener lifecycle.
 
-Task 1: Project setup
-Task 2: Drum kit UI
-Task 3: Audio and keyboard integration
-Task 4: Accessibility and visual feedback
-Task 5: Automated testing
-Task 6: Final verification
+### Component tests
 
-See task_decomposition.md for detailed subtasks.
+File:
+`src/components/__tests__/DrumKit.test.jsx`
+
+Tests:
+- Pad rendering.
+- Click and focused-key activation.
+- Hit history cap and order.
+- Clearing the history.
+- Audio errors.
+- Accessible digital meter.
+
+Vitest uses jsdom and mocks the browser audio
+implementation.
+
+Passing tests does not establish that real audio
+sounds correct or that WCAG 2.2 AA is fully satisfied.
+
+## Manual responsive and accessibility checks
+
+1. View at 320, 375, 768 and 1280 CSS pixels.
+2. Check for horizontal page overflow.
+3. Test desktop at 200% browser zoom.
+4. Verify focus rings on buttons.
+5. Check contrast and high-contrast mode.
+6. Inspect with NVDA or VoiceOver.
+7. Verify all seven sounds with speakers.
+8. Check that the sound meter responds.
+9. Test prefers-reduced-motion.
+
+## Remaining work
+
+Task 6:
+- Lighthouse and WCAG audit.
+- Cross-browser smoke tests.
+- Final documentation.
+- Git commits 11 and 12.
+
+Refer to task_decomposition.md for the project plan.

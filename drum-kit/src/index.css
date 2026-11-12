@@ -1,152 +1,69 @@
 
-/* Task 4: transient pad activation */
+/* Task 5: minimum input targets, narrow viewport,
+   and zoom resilience. */
 
-.drum-pad.is-active {
-  border-color: var(--accent);
-  background: #293a52;
-  box-shadow: inset 0 0 0 1px var(--accent);
+html {
+  overflow-wrap: break-word;
 }
 
-/* Accessible screen-reader-only text */
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* History and meter layout */
-
-.feedback-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 1rem;
-}
-
+.app-shell,
+.studio,
 .feedback-card {
   min-width: 0;
-  border: 1px solid #475569;
-  background: #0f172a;
-  border-radius: 0.85rem;
-  padding: 1.15rem;
 }
 
-.feedback-card h3 {
-  margin: 0;
-  font-size: 1.15rem;
+.studio__header > div {
+  min-width: 0;
 }
 
-.feedback-card__header {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
+.studio__tag {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
 }
 
-.feedback-note {
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  line-height: 1.5;
+.drum-pad {
+  min-height: 150px;
+  touch-action: manipulation;
 }
 
 .clear-button {
-  background: #26374b;
-  border: 1px solid #94a3b8;
-  color: #f8fafc;
-  padding: 0.45rem 0.65rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
 }
 
-.clear-button:hover:not(:disabled) {
-  background: #36516c;
-}
-
-.clear-button:focus-visible {
-  outline: 3px solid #5eead4;
-  outline-offset: 3px;
-}
-
-.clear-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.history-empty {
-  color: #cbd5e1;
-}
-
-.hit-list {
-  padding-left: 1.5rem;
-  margin: 0;
-  max-height: 20rem;
-  overflow-y: auto;
+.feedback-card__header {
+  flex-wrap: wrap;
 }
 
 .hit-list__item {
-  padding: 0.55rem 0;
-  border-bottom: 1px solid #334155;
+  overflow-wrap: anywhere;
 }
 
-.hit-list__item:last-child {
-  border-bottom: 0;
-}
+@media (max-width: 360px) {
+  .studio {
+    padding: 0.85rem;
+  }
 
-.hit-list__name {
-  font-weight: 700;
-}
+  .drum-grid {
+    gap: 0.5rem;
+  }
 
-.hit-list__metadata {
-  display: block;
-  color: #cbd5e1;
-  font-size: 0.85rem;
-  margin-top: 0.2rem;
-}
+  .drum-pad {
+    min-height: 120px;
+    padding: 0.75rem 0.25rem;
+  }
 
-/* Live digital audio meter */
+  .drum-pad__key {
+    font-size: 1.6rem;
+  }
 
-.meter-readout {
-  font-size: 1.6rem;
-  font-weight: 800;
-  margin: 1rem 0 0.5rem;
-  font-variant-numeric: tabular-nums;
-}
+  .drum-pad__name {
+    font-size: 0.9rem;
+  }
 
-.meter-track {
-  height: 1.25rem;
-  background: #334155;
-  border: 1px solid #94a3b8;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.meter-fill {
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    #5eead4,
-    #fcd34d,
-    #fb7185
-  );
-}
-
-.meter-scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.4rem;
-  color: #cbd5e1;
-  font-size: 0.8rem;
-}
-
-@media (max-width: 640px) {
-  .feedback-grid {
-    grid-template-columns: 1fr;
+  .drum-pad__hint {
+    font-size: 0.7rem;
   }
 }
