@@ -1,5 +1,8 @@
 
-import React from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
 
 import usePubgAirdropTimer from
   "../hooks/usePubgAirdropTimer";
@@ -9,20 +12,19 @@ import {
 } from "../utils/timerUtils";
 
 /**
- * PUBG Airdrop Countdown
+ * Accessible PUBG airdrop countdown.
  *
- * Task 2:
- * - Live anti-drift countdown
- * - Server offset support
- * - Expiration status
- * - Accessible timer display
+ * Task 5 improvements:
+ * - No announcements every second
+ * - Expiration announcement
+ * - Meaningful status descriptions
+ * - Accessible fallback for invalid dates
  */
 export default function AirdropCountdown({
   targetEpochMs,
   serverOffsetMs = 0,
 }) {
   const {
-    remainingMs,
     hours,
     minutes,
     seconds,
@@ -34,76 +36,119 @@ export default function AirdropCountdown({
     serverOffsetMs
   );
 
+  const [announcement, setAnnouncement] =
+    useState("");
+
   /**
-   * Format the server-provided
-   * expiration deadline for display.
+   * Announce expiration only when the
+   * active deadline transitions to
+   * the expired state.
+   *
+   * A deadline that is already expired
+   * when the component first mounts is
+   * displayed normally, without forcing
+   * an immediate announcement.
    */
-  const targetDate = new Date(targetEpochMs);
+  const [previousTimerState, setPreviousTimerState] =
+    useState(() => ({
+      targetEpochMs,
+      isExpired,
+    }));
+
+  if (
+    previousTimerState.targetEpochMs !==
+    targetEpochMs
+  ) {
+    setPreviousTimerState({
+      targetEpochMs,
+      isExpired,
+    });
+
+    setAnnouncement("");
+  } else if (
+    !previousTimerState.isExpired &&
+    isExpired
+  ) {
+    setPreviousTimerState({
+      targetEpochMs,
+      isExpired: true,
+    });
+
+    setAnnouncement(
+      "The PUBG airdrop has expired."
+    );
+  }
+
+  /**
+   * Clear transient announcements
+   * if the component becomes invalid.
+   */
+  useEffect(() => {
+    if (!isValid) {
+      setAnnouncement("");
+    }
+  }, [isValid]);
+
+  const targetDate =
+    new Date(targetEpochMs);
 
   const hasValidDeadline =
     isValid &&
-    !Number.isNaN(targetDate.getTime());
+    !Number.isNaN(
+      targetDate.getTime()
+    );
 
-  const formattedDeadline = hasValidDeadline
-    ? targetDate.toLocaleString("en-VN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-        timeZone: "Asia/Ho_Chi_Minh",
-      })
-    : "Unavailable";
+  const formattedDeadline =
+    hasValidDeadline
+      ? targetDate.toLocaleString(
+          "en-VN",
+          {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: "Asia/Ho_Chi_Minh",
+          }
+        )
+      : "Unavailable";
 
-  /**
-   * Screen reader description.
-   *
-   * The timer itself does not announce
-   * every second because that would
-   * be distracting to users.
-   */
-  const accessibleTime = isValid
-    ? `${hours} hours, ${minutes} minutes, ${seconds} seconds remaining`
-    : "Countdown unavailable";
-
-  /**
-   * Determine the UI status.
-   */
   let statusText = "LIVE";
-  let statusDescription =
-    "Countdown synchronized with the current time.";
 
   if (!isValid) {
     statusText = "UNAVAILABLE";
-    statusDescription =
-      "The countdown deadline is invalid.";
   } else if (isExpired) {
     statusText = "EXPIRED";
-    statusDescription =
-      "This airdrop has expired.";
   }
+
+  const countdownLabel =
+    !isValid
+      ? "Countdown unavailable"
+      : isExpired
+        ? "Airdrop expired"
+        : `${hours} hours, ${minutes} minutes and ${seconds} seconds remaining`;
 
   return (
     <section
       className="countdown-panel"
-      aria-label="PUBG airdrop countdown"
+      aria-labelledby="airdrop-timer-heading"
     >
       <div className="countdown-header">
         <span className="section-eyebrow">
           AIRDROP COUNTDOWN
         </span>
 
-        <span
-          className="live-indicator"
-          aria-label={`Airdrop status: ${statusText}`}
-        >
+        <span className="live-indicator">
           <span
             className="status-dot"
             aria-hidden="true"
-          ></span>
+          />
 
           {statusText}
         </span>
       </div>
 
-      <h2 className="countdown-title">
+      <h2
+        id="airdrop-timer-heading"
+        className="countdown-title"
+      >
         {isExpired
           ? "This airdrop has ended"
           : "The next drop is coming"}
@@ -119,16 +164,18 @@ export default function AirdropCountdown({
         className="countdown-display"
         role="timer"
         aria-live="off"
-        aria-label={accessibleTime}
+        aria-label={countdownLabel}
       >
         <div className="time-unit">
-          <strong>
+          <strong aria-hidden="true">
             {isValid
               ? padTime(hours)
               : "--"}
           </strong>
 
-          <span>HOURS</span>
+          <span aria-hidden="true">
+            HOURS
+          </span>
         </div>
 
         <span
@@ -139,13 +186,15 @@ export default function AirdropCountdown({
         </span>
 
         <div className="time-unit">
-          <strong>
+          <strong aria-hidden="true">
             {isValid
               ? padTime(minutes)
               : "--"}
           </strong>
 
-          <span>MINUTES</span>
+          <span aria-hidden="true">
+            MINUTES
+          </span>
         </div>
 
         <span
@@ -156,13 +205,15 @@ export default function AirdropCountdown({
         </span>
 
         <div className="time-unit">
-          <strong>
+          <strong aria-hidden="true">
             {isValid
               ? padTime(seconds)
               : "--"}
           </strong>
 
-          <span>SECONDS</span>
+          <span aria-hidden="true">
+            SECONDS
+          </span>
         </div>
       </div>
 
@@ -171,15 +222,11 @@ export default function AirdropCountdown({
         <strong>
           {formattedDeadline}
         </strong>
-        {" "}ICT
-      </p>
-
-      <p className="feature-note">
-        {statusDescription}
+        {hasValidDeadline ? " ICT" : ""}
       </p>
 
       {isValid && !isExpired && (
-        <p className="deadline-text">
+        <p className="feature-note">
           Remaining duration:{" "}
           <strong>
             {formattedTime}
@@ -188,31 +235,31 @@ export default function AirdropCountdown({
       )}
 
       {isExpired && (
-        <p
-          className="feature-note"
-          role="status"
-        >
+        <p className="feature-note">
           The countdown has reached zero.
         </p>
       )}
 
       {!isValid && (
-        <p
-          className="feature-note"
-          role="status"
-        >
+        <p className="feature-note">
           Unable to load a valid deadline.
         </p>
       )}
 
-      {isValid &&
-        !isExpired &&
-        remainingMs > 0 && (
-          <p className="feature-note">
-            Timer automatically resynchronizes
-            when you return to this tab.
-          </p>
-        )}
+      <p className="feature-note">
+        The timer uses the current clock
+        and synchronizes when you return
+        to this tab.
+      </p>
+
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
     </section>
   );
 }

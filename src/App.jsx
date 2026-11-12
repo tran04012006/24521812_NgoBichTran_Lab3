@@ -19,15 +19,21 @@ export default function App() {
     <div className="app-shell" id="home">
       <Header />
 
-      <main>
-        <section className="hero-section">
+      <main
+        id="main-content"
+        tabIndex={-1}
+      >
+        <section
+          className="hero-section"
+          aria-labelledby="hero-heading"
+        >
           <div className="container">
             <div className="hero-content">
               <span className="hero-badge">
                 PUBG VIETNAM CHAMPIONSHIP
               </span>
 
-              <h1>
+              <h1 id="hero-heading">
                 THE ARENA
                 <br />
                 <span>AWAITS.</span>
@@ -142,8 +148,8 @@ export default function App() {
           </div>
 
           <span>
-            Mock data. Not affiliated with
-            KRAFTON or PUBG.
+            Mock data. Not affiliated
+            with KRAFTON or PUBG.
           </span>
         </div>
       </footer>

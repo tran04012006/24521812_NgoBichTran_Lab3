@@ -11,14 +11,13 @@ import useOptimisticClaim from
   "../hooks/useOptimisticClaim";
 
 /**
- * PUBG Reward Claim Card
+ * Accessible optimistic claim card.
  *
- * Task 3:
- * - Optimistic inventory
- * - Async API requests
- * - Duplicate-click protection
- * - HTTP 409 rollback
- * - Accessible feedback
+ * Task 5:
+ * - Clear button names
+ * - Pending request feedback
+ * - Error and success announcements
+ * - Keyboard-accessible testing controls
  */
 export default function RewardClaimCard({
   drop,
@@ -32,21 +31,11 @@ export default function RewardClaimCard({
     category,
   } = drop;
 
-  /**
-   * Development-only simulation control.
-   *
-   * This allows the user to deliberately
-   * trigger HTTP 409 conflicts.
-   */
   const [
     simulateConflict,
     setSimulateConflict,
   ] = useState(false);
 
-  /**
-   * The hook owns the displayed inventory
-   * and the complete claim lifecycle.
-   */
   const {
     remainingStock,
     isClaiming,
@@ -62,9 +51,18 @@ export default function RewardClaimCard({
   const isDisabled =
     isClaiming || isOutOfStock;
 
-  /**
-   * Determine button text.
-   */
+  const titleId =
+    `reward-title-${id}`;
+
+  const descriptionId =
+    `reward-description-${id}`;
+
+  const feedbackId =
+    `claim-feedback-${id}`;
+
+  const helpId =
+    `claim-help-${id}`;
+
   let buttonText = "CLAIM NOW";
 
   if (isClaiming) {
@@ -73,27 +71,32 @@ export default function RewardClaimCard({
     buttonText = "SOLD OUT";
   }
 
-  /**
-   * Submit a reward claim.
-   */
-  const handleClaim = async () => {
-    await claim({
+  const handleClaim = () => {
+    void claim({
       simulateConflict,
     });
   };
 
-  /**
-   * Determine accessible feedback styling.
-   */
   const feedbackClassName = [
     "claim-feedback",
     `claim-feedback-${claimStatus}`,
   ].join(" ");
 
+  const buttonAccessibleLabel =
+    isClaiming
+      ? `Claiming ${title}`
+      : isOutOfStock
+        ? `${title} is sold out`
+        : `Claim ${title}`;
+
+  const hasFeedback =
+    claimStatus !== "idle";
+
   return (
     <article
       className="reward-card"
-      aria-labelledby={`reward-title-${id}`}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
       <div className="reward-card-top">
         <span className="reward-category">
@@ -130,11 +133,14 @@ export default function RewardClaimCard({
       </div>
 
       <div className="reward-content">
-        <h3 id={`reward-title-${id}`}>
+        <h3 id={titleId}>
           {title}
         </h3>
 
-        <p className="reward-description">
+        <p
+          id={descriptionId}
+          className="reward-description"
+        >
           {description}
         </p>
 
@@ -160,11 +166,26 @@ export default function RewardClaimCard({
             className="claim-button"
             onClick={handleClaim}
             disabled={isDisabled}
+            aria-label={buttonAccessibleLabel}
+            aria-describedby={
+              hasFeedback
+                ? feedbackId
+                : helpId
+            }
             aria-busy={isClaiming}
           >
             {buttonText}
           </button>
         </div>
+
+        <p
+          id={helpId}
+          className="sr-only"
+        >
+          The displayed stock will decrease
+          immediately. The server will
+          confirm or reject the claim.
+        </p>
 
         <div className="claim-simulation">
           <label
@@ -191,13 +212,14 @@ export default function RewardClaimCard({
           </label>
 
           <small className="simulation-description">
-            Testing mode: reject the
-            claim and restore inventory.
+            Testing mode: reject the claim
+            and restore inventory.
           </small>
         </div>
 
-        {claimStatus !== "idle" && (
+        {hasFeedback && (
           <div
+            id={feedbackId}
             className={feedbackClassName}
             role={
               claimStatus === "error" ||
@@ -205,12 +227,7 @@ export default function RewardClaimCard({
                 ? "alert"
                 : "status"
             }
-            aria-live={
-              claimStatus === "error" ||
-              claimStatus === "conflict"
-                ? "assertive"
-                : "polite"
-            }
+            aria-atomic="true"
           >
             <span
               className="claim-feedback-icon"

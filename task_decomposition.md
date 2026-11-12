@@ -126,3 +126,75 @@
 |       +-- Verify React 19 build
 |       +-- Commit 5: Claim service and hook
 |       +-- Commit 6: Reward UI and integration
++-- Task 5: Accessibility & Performance [IN PROGRESS]
+|   |
+|   +-- 5.1 Accessibility Foundation
+|   |   |
+|   |   +-- Add skip-to-content navigation
+|   |   +-- Add meaningful focus destinations
+|   |   +-- Improve visible keyboard focus
+|   |   +-- Respect reduced-motion settings
+|   |   +-- Support high-contrast preferences
+|   |
+|   +-- 5.2 Virtualization Improvements
+|   |   |
+|   |   +-- Measure actual viewport height
+|   |   +-- Observe container resize
+|   |   +-- Clamp scroll position
+|   |   +-- Reset scroll when query changes
+|   |   +-- Support keyboard scroll commands
+|   |   +-- Preserve correct spacer heights
+|   |   +-- Clean up observers
+|   |
+|   +-- 5.3 React Rendering Performance
+|   |   |
+|   |   +-- Extract memoized leaderboard rows
+|   |   +-- Keep stable row properties
+|   |   +-- Memoize filtering and sorting
+|   |   +-- Use deferred search values
+|   |   +-- Avoid unnecessary callback changes
+|   |
+|   +-- 5.4 Leaderboard Accessibility
+|   |   |
+|   |   +-- Label all filter controls
+|   |   +-- Announce result counts
+|   |   +-- Announce active sort options
+|   |   +-- Provide keyboard scroll instructions
+|   |   +-- Provide meaningful empty states
+|   |   +-- Maintain accessible table structure
+|   |
+|   +-- 5.5 Kill-Feed Accessibility
+|   |   |
+|   |   +-- Improve event descriptions
+|   |   +-- Add screen-reader result status
+|   |   +-- Support keyboard scrolling
+|   |   +-- Improve reset controls
+|   |   +-- Handle empty results
+|   |
+|   +-- 5.6 Countdown & Claim Feedback
+|   |   |
+|   |   +-- Announce expiration once
+|   |   +-- Avoid announcements every second
+|   |   +-- Improve claim button labels
+|   |   +-- Improve pending feedback
+|   |   +-- Improve conflict feedback
+|   |   +-- Preserve optimistic behavior
+|   |
+|   +-- 5.7 Responsive Improvements
+|   |   |
+|   |   +-- Improve filter layouts
+|   |   +-- Support small mobile screens
+|   |   +-- Support horizontal table scrolling
+|   |   +-- Preserve keyboard focus visibility
+|   |
+|   +-- 5.8 Verification
+|       |
+|       +-- Test keyboard navigation
+|       +-- Test virtual scroll resizing
+|       +-- Test filtering and sorting
+|       +-- Test claim and timer regressions
+|       +-- Test reduced motion
+|       +-- Test production build
+|       |
+|       +-- Commit 9: Accessibility foundation
+|       +-- Commit 10: Performance and responsive UI
