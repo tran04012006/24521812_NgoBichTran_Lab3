@@ -230,3 +230,68 @@ Task 4
 │   ├── 8.8 Test Stop Playback
 │   ├── 8.9 Test concurrent manual input
 │   └── 8.10 Verify production build
+Task 5
+│
+├── 1. Playback Cancellation
+│   ├── 1.1 Improve AbortController management
+│   ├── 1.2 Cancel pending playback delays
+│   ├── 1.3 Prevent notes starting after cancellation
+│   ├── 1.4 Release playback-owned notes
+│   ├── 1.5 Support repeated cancellation
+│   ├── 1.6 Prevent concurrent playback sessions
+│   └── 1.7 Clean up after playback errors
+│
+├── 2. Audio Engine Cleanup
+│   ├── 2.1 Track allocated audio voices
+│   ├── 2.2 Track released oscillators
+│   ├── 2.3 Implement immediate stopAll
+│   ├── 2.4 Disconnect completed audio nodes
+│   ├── 2.5 Prevent duplicate oscillator.stop calls
+│   ├── 2.6 Close AudioContext on disposal
+│   └── 2.7 Preserve FIFO voice stealing
+│
+├── 3. React Lifecycle
+│   ├── 3.1 Preserve synthesizer with useRef
+│   ├── 3.2 Preserve sequencer with useRef
+│   ├── 3.3 Support React 19 Strict Mode
+│   ├── 3.4 Remove global event listeners
+│   ├── 3.5 Cancel playback on unmount
+│   └── 3.6 Prevent state updates after unmount
+│
+├── 4. Accessibility
+│   ├── 4.1 Improve accessible button labels
+│   ├── 4.2 Add keyboard navigation
+│   ├── 4.3 Support ArrowLeft and ArrowRight
+│   ├── 4.4 Support Home and End
+│   ├── 4.5 Preserve Enter and Space activation
+│   ├── 4.6 Add screen-reader status announcements
+│   └── 4.7 Preserve visible focus indicators
+│
+├── 5. React Optimization
+│   ├── 5.1 Preserve React.memo for PianoKey
+│   ├── 5.2 Use useCallback for note handlers
+│   ├── 5.3 Keep static piano data outside render
+│   ├── 5.4 Avoid unnecessary state updates
+│   ├── 5.5 Keep audio objects outside React state
+│   └── 5.6 Verify rendering using React DevTools
+│
+├── 6. Integration
+│   ├── 6.1 Update PolyphonicSynth.js
+│   ├── 6.2 Update Sequencer.js
+│   ├── 6.3 Update PianoKey.jsx
+│   ├── 6.4 Update Piano.jsx
+│   ├── 6.5 Preserve KeyboardGuide.jsx
+│   ├── 6.6 Preserve RecorderControls.jsx
+│   └── 6.7 Preserve existing CSS
+│
+├── 7. Verification
+│   ├── 7.1 Test immediate Stop Playback
+│   ├── 7.2 Test Stop All Notes
+│   ├── 7.3 Test overlapping notes
+│   ├── 7.4 Test repeated MIDI notes
+│   ├── 7.5 Test 8-voice FIFO limit
+│   ├── 7.6 Test window blur
+│   ├── 7.7 Test keyboard accessibility
+│   ├── 7.8 Test React rendering
+│   ├── 7.9 Test component unmount
+│   └── 7.10 Verify production build

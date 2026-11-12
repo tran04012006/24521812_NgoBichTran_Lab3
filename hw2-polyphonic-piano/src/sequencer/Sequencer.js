@@ -1,3 +1,4 @@
+
 const VALID_SPEEDS = [0.5, 1, 2];
 
 function createAbortError() {
@@ -6,7 +7,7 @@ function createAbortError() {
   return error;
 }
 
-// Wait until a given timestamp, unless canceled.
+// Abortable asynchronous delay.
 function waitUntil(targetTime, signal) {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -14,34 +15,36 @@ function waitUntil(targetTime, signal) {
       return;
     }
 
-    const remaining = Math.max(
-      0,
-      targetTime - performance.now()
-    );
-
     let timerId;
-
-    const cleanup = () => {
-      clearTimeout(timerId);
-      signal.removeEventListener(
-        "abort",
-        handleAbort
-      );
-    };
 
     const handleAbort = () => {
       cleanup();
       reject(createAbortError());
     };
 
+    const cleanup = () => {
+      clearTimeout(timerId);
+
+      signal.removeEventListener(
+        "abort",
+        handleAbort
+      );
+    };
+
+    const remaining = Math.max(
+      0,
+      targetTime - performance.now()
+    );
+
     timerId = setTimeout(() => {
       cleanup();
 
       if (signal.aborted) {
         reject(createAbortError());
-      } else {
-        resolve();
+        return;
       }
+
+      resolve();
     }, remaining);
 
     signal.addEventListener(
@@ -55,25 +58,31 @@ function waitUntil(targetTime, signal) {
 export default class Sequencer {
   constructor() {
     this.isRecording = false;
+    this.isPlaying = false;
 
     this.recordingStartTime = 0;
 
-    // Completed notes and their absolute start offsets.
     this.completedNotes = [];
-
-    // Notes whose key-release events have not yet occurred.
     this.recordingNotes = new Map();
 
-    // Completed recording in the assignment format.
     this.events = [];
 
-    this.playbackController = null;
-    this.isPlaying = false;
+    // Current playback session.
+    this.playbackSession = null;
+
+    // Incrementing ID prevents source collisions
+    // between different playback sessions.
+    this.playbackSessionId = 0;
+
+    this.disposed = false;
   }
 
-  // Begin recording a new sequence.
   startRecording() {
-    if (this.isRecording || this.isPlaying) {
+    if (
+      this.disposed ||
+      this.isRecording ||
+      this.isPlaying
+    ) {
       return false;
     }
 
@@ -81,13 +90,14 @@ export default class Sequencer {
     this.completedNotes = [];
     this.recordingNotes.clear();
 
-    this.recordingStartTime = performance.now();
+    this.recordingStartTime =
+      performance.now();
+
     this.isRecording = true;
 
     return true;
   }
 
-  // Record when a new voice starts.
   recordNoteOn(midi, freqHz) {
     if (!this.isRecording) {
       return;
@@ -108,7 +118,6 @@ export default class Sequencer {
     });
   }
 
-  // Record when the final owner releases the note.
   recordNoteOff(midi) {
     if (!this.isRecording) {
       return;
@@ -135,13 +144,12 @@ export default class Sequencer {
     this.recordingNotes.delete(midi);
   }
 
-  // Finish recording and produce the required format.
   stopRecording() {
     if (!this.isRecording) {
       return this.getEvents();
     }
 
-    // Close notes that are still held.
+    // Close held notes at recording end.
     for (const midi of Array.from(
       this.recordingNotes.keys()
     )) {
@@ -150,10 +158,12 @@ export default class Sequencer {
 
     this.isRecording = false;
 
-    // Sort by note start time, not release time.
-    // This is essential for overlapping notes.
-    const sortedNotes = [...this.completedNotes].sort(
-      (a, b) => a.startOffsetMs - b.startOffsetMs
+    // FIFO is based on note start order.
+    const sortedNotes = [
+      ...this.completedNotes,
+    ].sort(
+      (a, b) =>
+        a.startOffsetMs - b.startOffsetMs
     );
 
     let previousStartMs = 0;
@@ -174,14 +184,12 @@ export default class Sequencer {
       return event;
     });
 
-    this.recordingNotes.clear();
     this.completedNotes = [];
+    this.recordingNotes.clear();
 
     return this.getEvents();
   }
 
-  // Return a copy so external code cannot modify
-  // the internal event array accidentally.
   getEvents() {
     return this.events.map((event) => ({
       ...event,
@@ -189,7 +197,11 @@ export default class Sequencer {
   }
 
   clearRecording() {
-    if (this.isRecording || this.isPlaying) {
+    if (
+      this.isRecording ||
+      this.isPlaying ||
+      this.disposed
+    ) {
       return false;
     }
 
@@ -200,23 +212,45 @@ export default class Sequencer {
     return true;
   }
 
-  // Play recorded events at the selected speed.
-  //
-  // onNoteOn(midi, frequency, sourceId)
-  // onNoteOff(midi, sourceId)
-  //
-  // Every event receives a unique source ID.
+  // Convert event delta times into absolute
+  // playback start offsets.
+  buildSchedule(events, speed, sessionId) {
+    let elapsedMs = 0;
+
+    return events.map((event, index) => {
+      elapsedMs += event.deltaMs;
+
+      return {
+        ...event,
+        startMs: elapsedMs / speed,
+        durationScaledMs:
+          event.durationMs / speed,
+
+        // Every event has unique ownership,
+        // including repeated MIDI notes.
+        sourceId:
+          `playback:${sessionId}:${index}`,
+      };
+    });
+  }
+
   async play({
     speed = 1,
     onNoteOn,
     onNoteOff,
   }) {
-    if (this.isPlaying || this.isRecording) {
+    if (
+      this.disposed ||
+      this.isPlaying ||
+      this.isRecording
+    ) {
       return false;
     }
 
     if (!VALID_SPEEDS.includes(speed)) {
-      throw new Error("Unsupported playback speed");
+      throw new Error(
+        "Unsupported playback speed"
+      );
     }
 
     if (
@@ -235,52 +269,59 @@ export default class Sequencer {
     }
 
     const controller = new AbortController();
-    const { signal } = controller;
+    const signal = controller.signal;
 
-    this.playbackController = controller;
-    this.isPlaying = true;
+    const sessionId =
+      ++this.playbackSessionId;
 
-    // Sources currently owned by this playback.
-    // Map<sourceId, midi>
-    const playbackOwners = new Map();
-
-    // Independent asynchronous note-release tasks.
-    const releaseTasks = [];
-
-    // Compute absolute note start offsets.
-    // Preserve FIFO order without serializing note lengths.
-    let accumulatedStartMs = 0;
-
-    const scheduledEvents = events.map(
-      (event, index) => {
-        accumulatedStartMs += event.deltaMs;
-
-        return {
-          ...event,
-          sourceId: `playback:${index}`,
-          startMs: accumulatedStartMs / speed,
-          durationScaledMs:
-            event.durationMs / speed,
-        };
-      }
+    const schedule = this.buildSchedule(
+      events,
+      speed,
+      sessionId
     );
 
-    const playbackStart = performance.now();
+    // Each session tracks only its own sources.
+    // Map<sourceId, midi>
+    const owners = new Map();
 
     const releaseOwnedNote = (sourceId) => {
-      if (!playbackOwners.has(sourceId)) {
+      if (!owners.has(sourceId)) {
         return;
       }
 
-      const midi = playbackOwners.get(sourceId);
-      playbackOwners.delete(sourceId);
+      const midi = owners.get(sourceId);
+
+      // Delete ownership first so repeated
+      // cancellation cannot release twice.
+      owners.delete(sourceId);
 
       onNoteOff(midi, sourceId);
     };
 
+    const releaseAllOwnedNotes = () => {
+      for (const sourceId of Array.from(
+        owners.keys()
+      )) {
+        releaseOwnedNote(sourceId);
+      }
+    };
+
+    const session = {
+      id: sessionId,
+      controller,
+      owners,
+      releaseAllOwnedNotes,
+    };
+
+    this.playbackSession = session;
+    this.isPlaying = true;
+
+    const releaseTasks = [];
+    const playbackStart = performance.now();
+
     try {
-      // Start notes in FIFO order.
-      for (const event of scheduledEvents) {
+      // Start all notes in FIFO event order.
+      for (const event of schedule) {
         await waitUntil(
           playbackStart + event.startMs,
           signal
@@ -296,82 +337,103 @@ export default class Sequencer {
           event.sourceId
         );
 
+        // A note might fail to allocate if
+        // the audio engine is unavailable.
         if (started === false) {
           continue;
         }
 
-        playbackOwners.set(
+        owners.set(
           event.sourceId,
           event.midi
         );
 
-        // The release is scheduled independently.
-        // Do not await here: overlapping notes
-        // must be allowed to sound together.
+        // Use the recording's absolute start
+        // time for its scheduled note-off.
+        // This avoids accumulating extra delay
+        // from late note-start callbacks.
         const releaseTime =
-          performance.now() +
+          playbackStart +
+          event.startMs +
           event.durationScaledMs;
 
+        // Schedule release independently,
+        // allowing notes to overlap.
         const releaseTask = waitUntil(
           releaseTime,
           signal
         )
           .then(() => {
-            releaseOwnedNote(event.sourceId);
+            releaseOwnedNote(
+              event.sourceId
+            );
           })
           .catch((error) => {
             if (error.name !== "AbortError") {
-              throw error;
+              // Keep pending tasks handled.
+              console.error(
+                "Note release failed:",
+                error
+              );
             }
           });
 
         releaseTasks.push(releaseTask);
       }
 
-      // Wait for every scheduled release.
       await Promise.all(releaseTasks);
 
       return !signal.aborted;
     } catch (error) {
       if (error.name !== "AbortError") {
-        throw error;
+        console.error(
+          "Sequencer playback error:",
+          error
+        );
       }
 
       return false;
     } finally {
-      // Cancel any pending work on abnormal exit.
+      // Abort outstanding delays on any exit.
       if (!signal.aborted) {
         controller.abort();
       }
 
-      // Release only this sequencer's input sources.
-      // Manually held keyboard/mouse notes remain owned
-      // by their own input sources.
-      for (const sourceId of Array.from(
-        playbackOwners.keys()
-      )) {
-        releaseOwnedNote(sourceId);
-      }
+      // Cleanup is idempotent.
+      releaseAllOwnedNotes();
 
-      this.isPlaying = false;
-
-      if (this.playbackController === controller) {
-        this.playbackController = null;
+      if (this.playbackSession === session) {
+        this.playbackSession = null;
+        this.isPlaying = false;
       }
     }
   }
 
   stopPlayback() {
-    if (!this.playbackController) {
+    const session = this.playbackSession;
+
+    if (!session) {
       return false;
     }
 
-    this.playbackController.abort();
+    // Synchronously invalidate every pending wait.
+    session.controller.abort();
+
+    // Immediately release playback ownership.
+    // The owner release callback is responsible
+    // for calling the synthesizer's noteOff.
+    session.releaseAllOwnedNotes();
 
     return true;
   }
 
   dispose() {
+    if (this.disposed) {
+      return;
+    }
+
+    this.disposed = true;
+
     this.stopPlayback();
 
     this.isRecording = false;

@@ -7,26 +7,34 @@ const DECAY_TIME = 0.12;
 const SUSTAIN_LEVEL = 0.35;
 const RELEASE_TIME = 0.04;
 
+const MASTER_VOLUME = 0.35;
+
 export default class PolyphonicSynth {
   constructor(maxVoices = DEFAULT_MAX_VOICES) {
-    if (!Number.isInteger(maxVoices) || maxVoices < 1) {
-      throw new Error("maxVoices must be a positive integer");
+    if (
+      !Number.isInteger(maxVoices) ||
+      maxVoices < 1
+    ) {
+      throw new Error(
+        "maxVoices must be a positive integer"
+      );
     }
+
+    this.maxVoices = maxVoices;
 
     this.ctx = null;
     this.masterGain = null;
 
-    this.maxVoices = maxVoices;
-
-    // ES6 Map preserves insertion order.
-    // Key: MIDI note number
-    // Value: { oscillator, gainNode }
+    // Active voices in FIFO insertion order.
+    // MIDI -> Voice
     this.voices = new Map();
+
+    // Includes voices currently fading out.
+    this.allVoices = new Set();
 
     this.disposed = false;
   }
 
-  // Initialize audio only after a user interaction.
   initializeAudio() {
     if (this.disposed) {
       return false;
@@ -34,10 +42,14 @@ export default class PolyphonicSynth {
 
     if (!this.ctx) {
       const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
+        window.AudioContext ||
+        window.webkitAudioContext;
 
       if (!AudioContextClass) {
-        console.error("Web Audio API is not supported");
+        console.error(
+          "Web Audio API is not supported"
+        );
+
         return false;
       }
 
@@ -45,48 +57,64 @@ export default class PolyphonicSynth {
 
       this.masterGain = this.ctx.createGain();
 
-      // Keep combined polyphonic output at a safe level.
-      this.masterGain.gain.value = 0.35;
+      this.masterGain.gain.value =
+        MASTER_VOLUME;
 
-      this.masterGain.connect(this.ctx.destination);
+      this.masterGain.connect(
+        this.ctx.destination
+      );
+    }
+
+    if (this.ctx.state === "closed") {
+      return false;
     }
 
     if (this.ctx.state === "suspended") {
       this.ctx.resume().catch((error) => {
-        console.error("Failed to resume AudioContext:", error);
+        console.error(
+          "Failed to resume AudioContext:",
+          error
+        );
       });
     }
 
     return true;
   }
 
-  // Create one oscillator and gain node for one voice.
   createVoice(midi, frequency) {
     const now = this.ctx.currentTime;
 
-    const oscillator = this.ctx.createOscillator();
+    const oscillator =
+      this.ctx.createOscillator();
+
     const gainNode = this.ctx.createGain();
 
     oscillator.type = "triangle";
-    oscillator.frequency.setValueAtTime(frequency, now);
 
-    // Start close to zero to avoid clicking.
-    gainNode.gain.setValueAtTime(MIN_GAIN, now);
+    oscillator.frequency.setValueAtTime(
+      frequency,
+      now
+    );
 
-    // Attack: raise the volume.
-    gainNode.gain.exponentialRampToValueAtTime(
-      1.0,
+    const gain = gainNode.gain;
+
+    // Attack.
+    gain.setValueAtTime(
+      MIN_GAIN,
+      now
+    );
+
+    gain.exponentialRampToValueAtTime(
+      1,
       now + ATTACK_TIME
     );
 
-    // Decay: reduce volume to the sustain level.
-    gainNode.gain.exponentialRampToValueAtTime(
+    // Decay to sustain.
+    gain.exponentialRampToValueAtTime(
       SUSTAIN_LEVEL,
       now + ATTACK_TIME + DECAY_TIME
     );
 
-    // Audio connection:
-    // Oscillator -> GainNode -> MasterGain -> Speakers
     oscillator.connect(gainNode);
     gainNode.connect(this.masterGain);
 
@@ -96,15 +124,18 @@ export default class PolyphonicSynth {
       oscillator,
       gainNode,
       isReleased: false,
+      stopScheduled: false,
     };
 
-    // Free references to completed audio nodes.
+    this.allVoices.add(voice);
+
     oscillator.onended = () => {
       oscillator.disconnect();
       gainNode.disconnect();
 
-      // Only delete if this exact voice is still present.
-      // Prevent an old oscillator from deleting a newer
+      this.allVoices.delete(voice);
+
+      // An old voice must not delete a newer
       // voice with the same MIDI number.
       if (this.voices.get(midi) === voice) {
         this.voices.delete(midi);
@@ -116,78 +147,125 @@ export default class PolyphonicSynth {
     return voice;
   }
 
-  // Smoothly release a voice to avoid clicks.
+  // Smoothly release a single voice.
   releaseVoice(voice) {
-    if (!voice || voice.isReleased || !this.ctx) {
+    if (
+      !voice ||
+      voice.isReleased ||
+      !this.ctx
+    ) {
       return;
     }
 
     voice.isReleased = true;
 
     const now = this.ctx.currentTime;
-    const gainParam = voice.gainNode.gain;
 
-    // Cancel or hold the current envelope position.
-    if (typeof gainParam.cancelAndHoldAtTime === "function") {
-      gainParam.cancelAndHoldAtTime(now);
+    const gain = voice.gainNode.gain;
+
+    // Preserve the gain value during
+    // the transition when supported.
+    if (
+      typeof gain.cancelAndHoldAtTime ===
+      "function"
+    ) {
+      gain.cancelAndHoldAtTime(now);
     } else {
-      gainParam.cancelScheduledValues(now);
+      gain.cancelScheduledValues(now);
 
-      gainParam.setValueAtTime(
-        Math.max(gainParam.value, MIN_GAIN),
+      gain.setValueAtTime(
+        Math.max(gain.value, MIN_GAIN),
         now
       );
     }
 
-    // Fade to silence.
-    gainParam.exponentialRampToValueAtTime(
+    gain.exponentialRampToValueAtTime(
       MIN_GAIN,
       now + RELEASE_TIME
     );
 
-    // Stop after the release phase.
-    voice.oscillator.stop(now + RELEASE_TIME + 0.01);
+    if (!voice.stopScheduled) {
+      voice.stopScheduled = true;
+
+      voice.oscillator.stop(
+        now + RELEASE_TIME + 0.01
+      );
+    }
   }
 
-  // Play a note and return voice allocation information.
+  // Immediately silence a voice.
+  //
+  // The oscillator may have already been
+  // scheduled to stop after its release.
+  // In that case, setting gain to zero is
+  // enough to silence it immediately.
+  silenceVoice(voice) {
+    if (!voice || !this.ctx) {
+      return;
+    }
+
+    const now = this.ctx.currentTime;
+    const gain = voice.gainNode.gain;
+
+    gain.cancelScheduledValues(now);
+    gain.setValueAtTime(0, now);
+
+    voice.isReleased = true;
+
+    if (!voice.stopScheduled) {
+      voice.stopScheduled = true;
+
+      voice.oscillator.stop(now);
+    }
+  }
+
   noteOn(midi, frequency) {
+    const failure = () => ({
+      success: false,
+      stolenMidi: null,
+      activeVoices: this.voices.size,
+    });
+
     if (
       !Number.isInteger(midi) ||
       !Number.isFinite(frequency) ||
       frequency <= 0
     ) {
-      return {
-        success: false,
-        stolenMidi: null,
-        activeVoices: this.voices.size,
-      };
+      return failure();
     }
 
     if (!this.initializeAudio()) {
-      return {
-        success: false,
-        stolenMidi: null,
-        activeVoices: this.voices.size,
-      };
+      return failure();
     }
+
+    const now = this.ctx.currentTime;
+
+    // stopAll may have muted the master output.
+    this.masterGain.gain.cancelScheduledValues(now);
+
+    this.masterGain.gain.setValueAtTime(
+      MASTER_VOLUME,
+      now
+    );
 
     let stolenMidi = null;
 
-    // If the note is already active, replace that voice.
-    // Deleting first also refreshes its FIFO position.
+    // Retriggering the same MIDI note refreshes
+    // its position in the FIFO Map.
     if (this.voices.has(midi)) {
-      const existingVoice = this.voices.get(midi);
+      const oldVoice = this.voices.get(midi);
 
-      this.releaseVoice(existingVoice);
+      this.releaseVoice(oldVoice);
       this.voices.delete(midi);
     }
 
-    // FIFO voice stealing.
-    // A Map remembers the order entries were inserted.
+    // Remove the oldest voice if the pool is full.
     if (this.voices.size >= this.maxVoices) {
-      const oldestMidi = this.voices.keys().next().value;
+      const oldestMidi =
+        this.voices.keys().next().value;
 
-      const oldestVoice = this.voices.get(oldestMidi);
+      const oldestVoice =
+        this.voices.get(oldestMidi);
 
       this.releaseVoice(oldestVoice);
       this.voices.delete(oldestMidi);
@@ -195,10 +273,12 @@ export default class PolyphonicSynth {
       stolenMidi = oldestMidi;
     }
 
-    // Create and insert the newest voice.
-    const newVoice = this.createVoice(midi, frequency);
+    const voice = this.createVoice(
+      midi,
+      frequency
+    );
 
-    this.voices.set(midi, newVoice);
+    this.voices.set(midi, voice);
 
     return {
       success: true,
@@ -207,7 +287,6 @@ export default class PolyphonicSynth {
     };
   }
 
-  // Release a particular note.
   noteOff(midi) {
     const voice = this.voices.get(midi);
 
@@ -215,34 +294,45 @@ export default class PolyphonicSynth {
       return false;
     }
 
-    this.releaseVoice(voice);
-
-    // Remove from the active voice pool immediately.
     this.voices.delete(midi);
+    this.releaseVoice(voice);
 
     return true;
   }
 
-  // Release all currently active voices.
+  // Emergency stop for every allocated
+  // or currently releasing oscillator.
   stopAll() {
-    for (const voice of this.voices.values()) {
-      this.releaseVoice(voice);
+    if (this.ctx && this.masterGain) {
+      const now = this.ctx.currentTime;
+
+      this.masterGain.gain.cancelScheduledValues(
+        now
+      );
+
+      this.masterGain.gain.setValueAtTime(
+        0,
+        now
+      );
+    }
+
+    for (const voice of this.allVoices) {
+      this.silenceVoice(voice);
     }
 
     this.voices.clear();
   }
 
-  // Number of active voices.
   getActiveVoiceCount() {
     return this.voices.size;
   }
 
-  // Returns MIDI notes in FIFO order.
   getActiveMidiNotes() {
-    return Array.from(this.voices.keys());
+    return Array.from(
+      this.voices.keys()
+    );
   }
 
-  // Fully clean up the audio engine.
   dispose() {
     if (this.disposed) {
       return;
@@ -252,16 +342,18 @@ export default class PolyphonicSynth {
 
     this.stopAll();
 
-    if (this.ctx) {
-      const context = this.ctx;
-
-      // Closing the context silences all remaining audio.
-      context.close().catch((error) => {
-        console.error("Failed to close AudioContext:", error);
-      });
-    }
+    const context = this.ctx;
 
     this.ctx = null;
     this.masterGain = null;
+
+    if (context && context.state !== "closed") {
+      context.close().catch((error) => {
+        console.error(
+          "Failed to close AudioContext:",
+          error
+        );
+      });
+    }
   }
 }
