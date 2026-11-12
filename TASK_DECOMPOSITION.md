@@ -21,3 +21,10 @@
 - Prevent repeated keydown events.
 - Ignore shortcuts in editable controls.
 - Clean up event listeners correctly.
+## Task 4: Accessibility
+- Screen-reader announcements
+- Hit history
+- Digital sound-level meter
+- Real waveform measurement
+- Temporary pad feedback
+- Keyboard accessibility

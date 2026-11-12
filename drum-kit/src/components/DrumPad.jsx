@@ -1,21 +1,20 @@
 
 export default function DrumPad({
   drum,
-  isSelected,
-  onSelect,
+  isActive,
+  onTrigger,
 }) {
   return (
     <button
+      type="button"
       className={
         `drum-pad drum-pad--${drum.color}` +
-        (isSelected ? " is-selected" : "")
+        (isActive ? " is-active" : "")
       }
-      type="button"
       aria-label={
         `${drum.name} drum pad, physical key ${drum.key}`
       }
-      aria-pressed={isSelected}
-      onClick={() => onSelect(drum.id)}
+      onClick={() => onTrigger(drum.id)}
     >
       <span
         className="drum-pad__key"
@@ -35,7 +34,7 @@ export default function DrumPad({
         className="drum-pad__hint"
         aria-hidden="true"
       >
-        {isSelected ? "Last played" : "Play drum"}
+        {isActive ? "Playing" : "Play drum"}
       </span>
     </button>
   );

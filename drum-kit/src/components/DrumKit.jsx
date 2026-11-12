@@ -2,10 +2,13 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
 import DrumPad from "./DrumPad.jsx";
+import HitHistory from "./HitHistory.jsx";
+import SoundLevelMeter from "./SoundLevelMeter.jsx";
 
 import {
   DRUMS,
@@ -19,25 +22,79 @@ import {
 
 import { useDrumKeyboard } from "../hooks/useDrumKeyboard.js";
 
-export default function DrumKit() {
-  const [selectedPadId, setSelectedPadId] =
-    useState(null);
+const MAX_HITS = 12;
 
-  const [audioError, setAudioError] =
-    useState("");
+export default function DrumKit() {
+  const [activePadId, setActivePadId] = useState(null);
+  const [hits, setHits] = useState([]);
+  const [hitCount, setHitCount] = useState(0);
+
+  const [announcement, setAnnouncement] = useState(
+    "Ready. Play a drum to begin."
+  );
+
+  const [audioError, setAudioError] = useState("");
+
+  const nextHitId = useRef(0);
+  const activeTimer = useRef(null);
+  const mounted = useRef(true);
 
   const triggerPad = useCallback(async (padId) => {
+    const drum = DRUMS.find(
+      (item) => item.id === padId
+    );
+
+    if (!drum) return;
+
     try {
       await playDrum(padId);
 
-      setSelectedPadId(padId);
-      setAudioError("");
-    } catch (error) {
-      setAudioError(
-        error instanceof Error
-          ? error.message
-          : "Unable to play sound."
+      if (!mounted.current) return;
+
+      nextHitId.current += 1;
+      const count = nextHitId.current;
+
+      const time = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      setHits((previous) => [
+        {
+          id: count,
+          name: drum.name,
+          key: drum.key,
+          time,
+        },
+        ...previous,
+      ].slice(0, MAX_HITS));
+
+      setHitCount((previous) => previous + 1);
+
+      setAnnouncement(
+        `Hit ${count}: ${drum.name}.`
       );
+
+      setAudioError("");
+      setActivePadId(padId);
+
+      if (activeTimer.current) {
+        clearTimeout(activeTimer.current);
+      }
+
+      activeTimer.current = setTimeout(
+        () => setActivePadId(null),
+        180
+      );
+    } catch (error) {
+      if (mounted.current) {
+        setAudioError(
+          error instanceof Error
+            ? error.message
+            : "Unable to play sound."
+        );
+      }
     }
   }, []);
 
@@ -48,14 +105,18 @@ export default function DrumKit() {
   );
 
   useEffect(() => {
+    mounted.current = true;
+
     return () => {
+      mounted.current = false;
+
+      if (activeTimer.current) {
+        clearTimeout(activeTimer.current);
+      }
+
       void closeDrumAudio();
     };
   }, []);
-
-  const selectedDrum = DRUMS.find(
-    (drum) => drum.id === selectedPadId
-  );
 
   return (
     <section
@@ -74,7 +135,7 @@ export default function DrumKit() {
         </div>
 
         <span className="studio__tag">
-          Playable · Task 3
+          Accessible feedback · Task 4
         </span>
       </div>
 
@@ -82,9 +143,10 @@ export default function DrumKit() {
         className="studio__instructions"
         id="drum-instructions"
       >
-        Click a pad, focus it and press Enter/Space,
-        or use the physical W, A, S, D, J, K, L
-        keys. Shortcuts are ignored while typing.
+        Click a pad, use Enter or Space on a
+        focused pad, or press physical
+        W, A, S, D, J, K, L.
+        Shortcuts are disabled while typing.
       </p>
 
       <div
@@ -97,22 +159,28 @@ export default function DrumKit() {
           <DrumPad
             key={drum.id}
             drum={drum}
-            isSelected={
-              selectedPadId === drum.id
-            }
-            onSelect={triggerPad}
+            isActive={activePadId === drum.id}
+            onTrigger={triggerPad}
           />
         ))}
       </div>
 
       <div
-        className="studio__selection"
+        className="sr-only"
         role="status"
         aria-live="polite"
+        aria-atomic="true"
       >
-        {selectedDrum
-          ? `Last played: ${selectedDrum.name} (${selectedDrum.key})`
-          : "Ready. Play a drum to begin."}
+        {announcement}
+      </div>
+
+      <div className="feedback-grid">
+        <HitHistory
+          hits={hits}
+          onClear={() => setHits([])}
+        />
+
+        <SoundLevelMeter hitCount={hitCount} />
       </div>
 
       {audioError && (
