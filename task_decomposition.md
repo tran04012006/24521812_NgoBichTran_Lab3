@@ -76,3 +76,53 @@
 |       +-- Test interval cleanup
 |       +-- Commit 3: Timer utilities and hook
 |       +-- Commit 4: Countdown UI integration
++-- Task 3: Optimistic Claim & HTTP 409 Rollback [IN PROGRESS]
+|   |
+|   +-- 3.1 Create Mock Claim Service
+|   |   +-- Create src/services/pubgClaimApi.js
+|   |   +-- Maintain server-authoritative stock
+|   |   +-- Simulate asynchronous requests
+|   |   +-- Validate claim requests
+|   |   +-- Return successful claim responses
+|   |   +-- Return HTTP 409 conflicts
+|   |   +-- Support simulated conflict testing
+|   |   +-- Support request cancellation
+|   |
+|   +-- 3.2 Implement Optimistic Claim Hook
+|   |   +-- Create src/hooks/useOptimisticClaim.js
+|   |   +-- Store visible inventory
+|   |   +-- Store pending request state
+|   |   +-- Store claim feedback
+|   |   +-- Deduct inventory immediately
+|   |   +-- Prevent duplicate submissions
+|   |   +-- Await asynchronous API response
+|   |   +-- Reconcile successful server response
+|   |   +-- Handle HTTP 409 conflicts
+|   |   +-- Restore stock on failure
+|   |   +-- Clean up pending requests
+|   |
+|   +-- 3.3 Update Reward Claim UI
+|   |   +-- Enable CLAIM button
+|   |   +-- Display optimistic stock
+|   |   +-- Display claiming status
+|   |   +-- Display success feedback
+|   |   +-- Display HTTP 409 error feedback
+|   |   +-- Add conflict simulation control
+|   |   +-- Disable duplicate clicks
+|   |
+|   +-- 3.4 Update Application Styles
+|   |   +-- Pending button styles
+|   |   +-- Success message styles
+|   |   +-- Error message styles
+|   |   +-- Conflict simulation controls
+|   |
+|   +-- 3.5 Verify Claim Behavior
+|       +-- Test successful claim
+|       +-- Test immediate stock deduction
+|       +-- Test duplicate-click prevention
+|       +-- Test HTTP 409 rollback
+|       +-- Test stock reaching zero
+|       +-- Test independent reward cards
+|       +-- Verify React 19 build
+|       +-- Commit 5: Claim service and hook
+|       +-- Commit 6: Reward UI and integration
