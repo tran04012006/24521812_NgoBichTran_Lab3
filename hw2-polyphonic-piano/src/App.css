@@ -5,7 +5,9 @@
   padding: 36px 24px 24px;
 }
 
-/* Header */
+/* =========================
+   Header
+========================= */
 
 .app-header {
   margin-bottom: 32px;
@@ -48,7 +50,9 @@
   line-height: 1.7;
 }
 
-/* Main piano panel */
+/* =========================
+   Main piano panel
+========================= */
 
 .piano-panel {
   padding: 24px;
@@ -83,14 +87,16 @@
   white-space: nowrap;
 
   border-radius: 20px;
-  background: #243452;
-  color: #93c5fd;
+  background: #134e4a;
+  color: #5eead4;
 
   font-size: 12px;
   font-weight: 700;
 }
 
-/* Key statistics */
+/* =========================
+   Piano statistics
+========================= */
 
 .piano-info {
   display: grid;
@@ -121,7 +127,159 @@
   font-size: 20px;
 }
 
-/* Horizontal piano scrolling */
+/* =========================
+   Polyphonic voice engine
+========================= */
+
+.voice-panel {
+  padding: 20px;
+  margin-bottom: 24px;
+
+  background: #0e1626;
+  border: 1px solid #334155;
+  border-radius: 12px;
+}
+
+.voice-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.voice-panel__header h3 {
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.voice-panel__header p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.stop-all-button {
+  padding: 10px 16px;
+
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+
+  background: #7f1d1d;
+  color: #fecaca;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.stop-all-button:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.stop-all-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.voice-panel__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.voice-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 14px;
+
+  background: #151c2d;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.voice-stat span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.voice-stat strong {
+  color: #5eead4;
+  font-size: 20px;
+}
+
+.voice-indicators {
+  display: flex;
+  gap: 8px;
+
+  margin-bottom: 20px;
+}
+
+.voice-indicator {
+  flex: 1;
+  height: 12px;
+
+  border: 1px solid #475569;
+  border-radius: 4px;
+
+  background: #1e293b;
+  transition: background-color 120ms ease;
+}
+
+.voice-indicator--active {
+  background: #14b8a6;
+  border-color: #2dd4bf;
+
+  box-shadow: 0 0 8px #14b8a655;
+}
+
+.active-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.active-notes > span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.active-notes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-note-badge {
+  padding: 6px 10px;
+
+  border: 1px solid #0d9488;
+  border-radius: 6px;
+
+  background: #134e4a;
+  color: #99f6e4;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.active-notes__empty {
+  color: #64748b;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* =========================
+   Scrollable piano
+========================= */
 
 .piano-scroll {
   width: 100%;
@@ -145,7 +303,9 @@
   padding-bottom: 8px;
 }
 
-/* White keys */
+/* =========================
+   White keys
+========================= */
 
 .white-keys {
   display: flex;
@@ -159,7 +319,7 @@
   appearance: none;
   cursor: pointer;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
 
   display: flex;
@@ -197,7 +357,17 @@
   background: #93c5fd;
 }
 
-/* Black keys */
+/* Currently sounding white key */
+.piano-key--white.piano-key--playing {
+  background: #2dd4bf;
+  border-color: #0d9488;
+
+  box-shadow: inset 0 0 18px #0f766e55;
+}
+
+/* =========================
+   Black keys
+========================= */
 
 .black-keys {
   position: absolute;
@@ -237,7 +407,17 @@
   background: #2563eb;
 }
 
-/* Labels */
+/* Currently sounding black key */
+.piano-key--black.piano-key--playing {
+  background: #0f766e;
+  border-color: #2dd4bf;
+
+  box-shadow: 0 0 12px #2dd4bf77;
+}
+
+/* =========================
+   Piano labels
+========================= */
 
 .piano-key__label {
   margin-bottom: 12px;
@@ -260,7 +440,9 @@
   font-size: 12px;
 }
 
-/* Selected note */
+/* =========================
+   Selected note
+========================= */
 
 .selected-note-panel {
   margin-top: 24px;
@@ -303,7 +485,9 @@
   color: #94a3b8;
 }
 
-/* Upcoming features */
+/* =========================
+   Upcoming features
+========================= */
 
 .upcoming-features {
   margin-top: 32px;
@@ -354,7 +538,9 @@
   font-weight: 600;
 }
 
-/* Footer */
+/* =========================
+   Footer
+========================= */
 
 .app-footer {
   padding: 28px 0 8px;
@@ -366,7 +552,9 @@
   font-size: 12px;
 }
 
-/* Responsive layout */
+/* =========================
+   Responsive layout
+========================= */
 
 @media (max-width: 768px) {
   .app {
@@ -382,11 +570,28 @@
   }
 
   .piano-info {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .voice-panel__header {
+    flex-direction: column;
+  }
+
+  .voice-panel__stats {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
   }
 
   .selected-note-details {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
   }
 
   .feature-grid {
@@ -401,6 +606,18 @@
 
   .piano-info__item strong {
     font-size: 17px;
+  }
+
+  .voice-panel {
+    padding: 14px;
+  }
+
+  .voice-stat {
+    padding: 10px;
+  }
+
+  .voice-stat strong {
+    font-size: 16px;
   }
 
   .selected-note-details strong {

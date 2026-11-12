@@ -13,17 +13,20 @@ const PianoKey = memo(function PianoKey({
   isBlack,
   whiteKeyIndex,
   isSelected,
+  isPlaying,
   onSelect,
+  onNoteOn,
+  onNoteOff,
 }) {
   const keyClassName = [
     "piano-key",
     isBlack ? "piano-key--black" : "piano-key--white",
     isSelected ? "piano-key--selected" : "",
+    isPlaying ? "piano-key--playing" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  // Black keys are placed between white keys.
   const keyStyle = isBlack
     ? {
         left:
@@ -32,16 +35,46 @@ const PianoKey = memo(function PianoKey({
       }
     : undefined;
 
-  // Do not create a wrapper around the key.
-  // The button itself is the interactive element.
+  const handlePointerDown = (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    // Keep receiving pointer events while the key is held.
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    onSelect(midi);
+    onNoteOn(midi, frequency);
+  };
+
+  const handlePointerUp = (event) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    onNoteOff(midi);
+  };
+
+  const handlePointerCancel = () => {
+    onNoteOff(midi);
+  };
+
+  const handleLostPointerCapture = () => {
+    onNoteOff(midi);
+  };
+
   return (
     <button
       type="button"
       className={keyClassName}
       style={keyStyle}
       aria-label={`${noteName}, ${frequency.toFixed(2)} hertz`}
-      aria-pressed={isSelected}
+      aria-pressed={isPlaying}
       title={`${noteName} | MIDI ${midi}`}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onLostPointerCapture={handleLostPointerCapture}
       onClick={() => onSelect(midi)}
     >
       <span className="piano-key__label">
